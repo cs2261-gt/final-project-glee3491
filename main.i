@@ -1334,16 +1334,86 @@ int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, i
 # 4 "main.c" 2
 # 1 "game.h" 1
 
+typedef struct {
+    int worldRow;
+    int worldCol;
+    int screenRow;
+    int screenCol;
+    int rDel;
+    int cDel;
+    int width;
+    int height;
+    int active;
+    int aniCounter;
+    int aniState;
+    int preAniState;
+    int curFrame;
+    int numFrames;
+    int bubbleTimer;
+} PLAYER;
+
+
+typedef struct {
+    int row;
+    int col;
+    int width;
+    int height;
+    int active;
+    int aniCounter;
+    int aniState;
+    int curFrame;
+    int numFrames;
+    int timer;
+} ENEMY;
+
+
+typedef struct {
+    int worldRow;
+    int worldCol;
+    int screenRow;
+    int screenCol;
+    int width;
+    int height;
+    int active;
+    int aniCounter;
+    int aniState;
+    int curFrame;
+    int numFrames;
+    int timer;
+} BUBBLE;
+# 57 "game.h"
+extern PLAYER penguin;
+extern ENEMY enemies[5];
+extern BUBBLE bubbles[3];
+extern int hOff;
+extern int vOff;
+extern OBJ_ATTR shadowOAM[128];
+extern int score;
+extern int lifeRemaining;
+
+
 void initGame();
+void updateGame();
 void drawGame();
 void initPlayer();
 void updatePlayer();
+void animatePlayer();
 void drawPlayer();
-
-extern int score;
-extern int winscore;
-extern int losescore;
+void initEnemy();
+void updateEnemy(ENEMY *);
+void drawEnemy(ENEMY *);
+void initBubble();
+void updateBubble(BUBBLE *);
+void drawBubble(BUBBLE *);
+void putBubble();
 # 5 "main.c" 2
+# 1 "spritesheet.h" 1
+# 21 "spritesheet.h"
+extern const unsigned short spritesheetTiles[16384];
+
+
+extern const unsigned short spritesheetPal[256];
+# 6 "main.c" 2
 # 1 "gamescreen.h" 1
 # 22 "gamescreen.h"
 extern const unsigned short gamescreenTiles[48];
@@ -1353,7 +1423,7 @@ extern const unsigned short gamescreenMap[1056];
 
 
 extern const unsigned short gamescreenPal[256];
-# 6 "main.c" 2
+# 7 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
 extern const unsigned short splashscreenTiles[32];
@@ -1363,7 +1433,7 @@ extern const unsigned short splashscreenMap[1024];
 
 
 extern const unsigned short splashscreenPal[256];
-# 7 "main.c" 2
+# 8 "main.c" 2
 # 1 "instructionscreen.h" 1
 # 22 "instructionscreen.h"
 extern const unsigned short instructionscreenTiles[32];
@@ -1373,7 +1443,7 @@ extern const unsigned short instructionscreenMap[1024];
 
 
 extern const unsigned short instructionscreenPal[256];
-# 8 "main.c" 2
+# 9 "main.c" 2
 # 1 "pausescreen.h" 1
 # 22 "pausescreen.h"
 extern const unsigned short pausescreenTiles[32];
@@ -1383,7 +1453,7 @@ extern const unsigned short pausescreenMap[1024];
 
 
 extern const unsigned short pausescreenPal[256];
-# 9 "main.c" 2
+# 10 "main.c" 2
 # 1 "winscreen.h" 1
 # 22 "winscreen.h"
 extern const unsigned short winscreenTiles[32];
@@ -1393,7 +1463,7 @@ extern const unsigned short winscreenMap[1024];
 
 
 extern const unsigned short winscreenPal[256];
-# 10 "main.c" 2
+# 11 "main.c" 2
 # 1 "losescreen.h" 1
 # 22 "losescreen.h"
 extern const unsigned short losescreenTiles[32];
@@ -1403,7 +1473,7 @@ extern const unsigned short losescreenMap[1024];
 
 
 extern const unsigned short losescreenPal[256];
-# 11 "main.c" 2
+# 12 "main.c" 2
 
 
 
@@ -1470,6 +1540,7 @@ void initialize() {
     initGame();
 
 
+    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (0<<14);
 
     hideSprites();
@@ -1533,31 +1604,32 @@ void instruction() {
 }
 
 void goToGame() {
-    hideSprites();
+
     waitForVBlank();
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
 
     DMANow(3, gamescreenPal, ((unsigned short *)0x5000000), 512 / 2);
     DMANow(3, gamescreenTiles, &((charblock *)0x6000000)[0], 96 / 2);
     DMANow(3, gamescreenMap, &((screenblock *)0x6000000)[28], 2112 / 2);
 
+    (*(volatile unsigned short *)0x04000012) = vOff;
+    (*(volatile unsigned short *)0x04000010) = hOff;
+
+    DMANow(3, spritesheetTiles, &((charblock *)0x6000000)[4], 32768 / 2);
+    DMANow(3, spritesheetPal, ((unsigned short *)0x5000200), 512 / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
+
     state = GAME;
 }
 
 void game() {
 
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
     updateGame();
+    drawGame();
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToPause();
-    }
-    if (winscore == 3) {
-        goToWin();
-    }
-    if (losescore == 0) {
-        goToLose();
     }
 
 

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "myLib.h"
 #include "game.h"
+#include "spritesheet.h"
 #include "gamescreen.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
@@ -74,6 +75,7 @@ void initialize() {
     initGame();
     // Tell the BG0 control register where to look for its tiles and tile map
     // And how to read them from this location
+    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_SMALL;
 
     hideSprites();
@@ -137,31 +139,32 @@ void instruction() {
 }
 
 void goToGame() {
-    hideSprites();
+
     waitForVBlank();
-    DMANow(3, shadowOAM, OAM, 512);
 
     // Load game screen
     DMANow(3, gamescreenPal, PALETTE, gamescreenPalLen / 2);
     DMANow(3, gamescreenTiles, &CHARBLOCK[0], gamescreenTilesLen / 2);
     DMANow(3, gamescreenMap, &SCREENBLOCK[28], gamescreenMapLen / 2);
 
+    REG_BG0VOFF = vOff;
+    REG_BG0HOFF = hOff;
+
+    DMANow(3, spritesheetTiles, &CHARBLOCK[4], spritesheetTilesLen / 2);
+    DMANow(3, spritesheetPal, SPRITEPALETTE, spritesheetPalLen / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, 128 * 4);
+
     state = GAME;
 }
 
 void game() {
 
-    DMANow(3, shadowOAM, OAM, 128 * 4);
     updateGame();
+    drawGame();
     
     if (BUTTON_PRESSED(BUTTON_START)) {
         goToPause();
-    }
-    if (winscore == 3) {
-        goToWin();
-    }
-    if (losescore == 0) {
-        goToLose();
     }
     // Win state
     // Lose state
