@@ -74,7 +74,7 @@ void initPlayer() {
     penguin.worldCol = SCREENWIDTH / 2 - penguin.height / 2 + hOff;
     penguin.aniCounter = 0;
     penguin.curFrame = 0;
-    penguin.numFrames = 3;
+    penguin.numFrames = 3;      
     penguin.aniCounter = PENFRONT;
     penguin.bubbleTimer = 20;
 }
@@ -82,8 +82,7 @@ void initPlayer() {
 void updatePlayer() {
     
     if (BUTTON_HELD(BUTTON_UP)) {
-        if (penguin.worldRow > 0
-        ) {
+        if (penguin.worldRow > 0) {
             penguin.worldRow -= penguin.rDel;
         }
 
