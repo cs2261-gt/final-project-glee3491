@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "myLib.h"
 #include "game.h"
 
@@ -11,7 +14,7 @@ int vOff;
 int hOff;
 
 // Penguin animation states for aniState
-enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, EN_1, EN_2, PENIDLE};
+enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
 
 void initGame() {
 
@@ -22,6 +25,10 @@ void initGame() {
     lifeRemaining = 3;
 
     initPlayer();
+
+    initBubble();
+
+    initEnemy();
 }
 
 
@@ -53,9 +60,9 @@ void drawGame() {
     REG_BG0VOFF = vOff; 
 
     // // draw enemies
-    // for (int i = 0; i < ENEMYCOUNT; i++) {
-    //     drawEnemy(&enemies[i]);
-    // }
+    for (int i = 0; i < ENEMYCOUNT; i++) {
+        drawEnemy(&enemies[i]);
+    }
 
     // draw bubbles
     for (int i = 0; i < BUBBLECOUNT; i++) {
@@ -234,25 +241,36 @@ void updateBubble(BUBBLE* bubble) {
 
 void drawBubble(BUBBLE* bubble) {
     if (bubble->active) {
-        shadowOAM[10].attr0 = bubble->screenRow | ATTR0_4BPP | ATTR0_SQUARE;
-        shadowOAM[10].attr1 = bubble->screenCol | ATTR1_SMALL;
+        shadowOAM[10].attr0 = (ROWMASK & bubble->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
+        shadowOAM[10].attr1 = (COLMASK & bubble->screenCol) | ATTR1_SMALL;
         shadowOAM[10].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(bubble->aniState * 2, bubble->curFrame * 2);
     }
 }
-// void initEmeny(){
-//     for (int i = 0; i < ENEMYCOUNT; i++) {
-//         enemies[i].width = 16;
-//         enemies[i].height = 16;
-//         enemies[i].active = 1;
-//         enemies[i].aniCounter = 0;
-//         enemies[i].curFrame = 0;
-//         enemies[i].numFrames = 1;
-//         if (i == 0 || i == 2 || i == 4) {
-//             enemies[i].aniState = EN_1;
-//         } else if (i == 1 || i == 4) {
-//             enemies[i].aniState = EN_2;
-//         }
-//     }
-// }
 
-// void updateEne
+void initEnemy() {
+    for (int i = 0; i < ENEMYCOUNT; i++) {
+        enemies[i].width = 16;
+        enemies[i].height = 16;
+        enemies[i].worldRow = (rand() % 200) + 16;
+        enemies[i].worldCol = (rand() % 200) + 16; 
+        enemies[i].active = 1;
+        enemies[i].aniCounter = 0;
+        enemies[i].curFrame = 0;
+        enemies[i].numFrames = 1;
+        if (i == 0 || i == 4 ) {
+            enemies[i].aniState = EN_1;
+        } else if (i == 1 || i == 3) {
+            enemies[i].aniState = EN_2;
+        } else if (i == 2) {
+            enemies[i].aniState = EN_3;
+        }
+    }
+}
+
+void drawEnemy(ENEMY *enemy) {
+    if (enemy->active) {
+        shadowOAM[20].attr0 = (ROWMASK & enemy->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
+        shadowOAM[20].attr1 = (COLMASK & enemy->screenCol) | ATTR1_SMALL;
+        shadowOAM[20].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(enemy->aniState * 2, enemy->curFrame * 2);
+    }
+}
