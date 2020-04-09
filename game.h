@@ -19,8 +19,10 @@ typedef struct {
 
 // Enemy Struct
 typedef struct {
-    int row;
-    int col;
+    int worldRow;
+    int worldCol;
+    int screenRow;
+    int screenCol;
     int width;
     int height;
     int active;
@@ -42,6 +44,7 @@ typedef struct {
     int active;
     int aniCounter;
     int aniState;
+    int preAniState;
     int curFrame;
     int numFrames;
     int timer;

@@ -1354,8 +1354,10 @@ typedef struct {
 
 
 typedef struct {
-    int row;
-    int col;
+    int worldRow;
+    int worldCol;
+    int screenRow;
+    int screenCol;
     int width;
     int height;
     int active;
@@ -1377,11 +1379,12 @@ typedef struct {
     int active;
     int aniCounter;
     int aniState;
+    int preAniState;
     int curFrame;
     int numFrames;
     int timer;
 } BUBBLE;
-# 57 "game.h"
+# 60 "game.h"
 extern PLAYER penguin;
 extern ENEMY enemies[5];
 extern BUBBLE bubbles[3];
