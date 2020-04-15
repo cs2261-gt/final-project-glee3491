@@ -3,15 +3,20 @@
 #include <time.h>
 #include "myLib.h"
 #include "game.h"
+#include "collisionmap.h"
 
 // Variables
 PLAYER penguin;
-ENEMY enemies[ENEMYCOUNT];
-BUBBLE bubbles[BUBBLECOUNT];
+ENEMY enemies[ENEMYCOUNT1];
+BUBBLE bubbles[BUBBLECOUNT1];
 int score;
 int lifeRemaining;
 int vOff;
 int hOff;
+int playerHOff;
+int playerVOff;
+int screenBlock;
+int sec;
 
 // Penguin animation states for aniState
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
@@ -28,22 +33,29 @@ void initGame() {
 
     initBubble();
 
-    initEnemy();
+    initEnemy(ENEMYCOUNT1);
 }
 
 
 void updateGame() {
 
+    // if (hOff > 512) {
+    //     screenBlock++;
+    //     hOff -= 512;
+    //     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(screenBlock) | BG_SIZE_LARGE | BG_4BPP; 
+    // }
+
+    // if ()
     // Update Player
     updatePlayer();
 
     // // Update all the enemies
-    // for (int i = 0; i < ENEMYCOUNT; i++) {
-    //     updateEnemy(&enemies[i]);
-    // }
+    for (int i = 0; i < ENEMYCOUNT1; i++) {
+        updateEnemy(&enemies[i]);
+    }
 
     // Update all the bubbles
-    for (int i = 0; i < BUBBLECOUNT; i++) {
+    for (int i = 0; i < BUBBLECOUNT1; i++) {
         updateBubble(&bubbles[i]);
     }
 }
@@ -60,12 +72,12 @@ void drawGame() {
     REG_BG0VOFF = vOff; 
 
     // // draw enemies
-    for (int i = 0; i < ENEMYCOUNT; i++) {
+    for (int i = 0; i < ENEMYCOUNT1; i++) {
         drawEnemy(&enemies[i]);
     }
 
     // draw bubbles
-    for (int i = 0; i < BUBBLECOUNT; i++) {
+    for (int i = 0; i < BUBBLECOUNT1; i++) {
         drawBubble(&bubbles[i]);
     }
 }
@@ -87,9 +99,11 @@ void initPlayer() {
 }
 
 void updatePlayer() {
-    
+
     if (BUTTON_HELD(BUTTON_UP)) {
-        if (penguin.worldRow > 0) {
+        if (penguin.worldRow > 0
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
             penguin.worldRow -= penguin.rDel;
         }
 
@@ -99,7 +113,9 @@ void updatePlayer() {
     }
 
     if (BUTTON_HELD(BUTTON_DOWN)) {
-        if (penguin.worldRow + penguin.height < 256) {
+        if (penguin.worldRow + penguin.height < 256
+            && collisionmapBitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
             penguin.worldRow += penguin.rDel;
         }
 
@@ -109,7 +125,9 @@ void updatePlayer() {
     }
 
     if (BUTTON_HELD(BUTTON_LEFT)) {
-        if (penguin.worldCol > 0) {
+        if (penguin.worldCol > 0
+            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
             penguin.worldCol -= penguin.cDel;
         }
 
@@ -119,7 +137,9 @@ void updatePlayer() {
     }
 
     if (BUTTON_HELD(BUTTON_RIGHT)) {
-        if (penguin.worldCol + penguin.width < 256) {
+        if (penguin.worldCol + penguin.width < 256
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
             penguin.worldCol += penguin.cDel;
         }
 
@@ -182,7 +202,7 @@ void drawPlayer() {
 }
 
 void initBubble() {
-    for (int i = 0; i < BUBBLECOUNT; i++) {
+    for (int i = 0; i < BUBBLECOUNT1; i++) {
         bubbles[i].width = 16;
         bubbles[i].height = 16;
         bubbles[i].aniCounter = 0;
@@ -190,12 +210,13 @@ void initBubble() {
         bubbles[i].curFrame = 0;
         bubbles[i].numFrames = 1;
         bubbles[i].active  = 0;
+        bubbles[i].index = i;
     }
 }
 
 void putBubble() {
-    for (int i = 0; i < BUBBLECOUNT; i++) {
-        if (bubbles[i].active == 0) {
+    for (int i = 0; i < BUBBLECOUNT1; i++) {
+        if (!bubbles[i].active) {
             bubbles[i].active = 1;
             if (penguin.aniState == PENFRONT) {
                 bubbles[i].worldRow = penguin.worldRow + penguin.height;
@@ -215,23 +236,6 @@ void putBubble() {
     }
 }
 void updateBubble(BUBBLE* bubble) {
-    
-    // if (BUTTON_PRESSED(BUTTON_A)) {
-    //     bubble->active = 1;
-    //     if (penguin.aniState == PENFRONT) {
-    //         bubble->worldRow = penguin.worldRow + penguin.height;
-    //         bubble->worldCol = penguin.worldCol;
-    //     } else if (penguin.aniState == PENBACK) {
-    //         bubble->worldRow = penguin.worldRow - penguin.height;
-    //         bubble->worldCol = penguin.worldCol;
-    //     } else if (penguin.aniState == PENLEFT) {
-    //         bubble->worldRow = penguin.worldRow;
-    //         bubble->worldCol = penguin.worldCol - penguin.width;
-    //     } else if (penguin.aniState == PENRIGHT) {
-    //         bubble->worldRow = penguin.worldRow;
-    //         bubble->worldCol = penguin.worldCol + penguin.width;
-    //     }
-    // }
     if (bubble->active) {
         bubble->screenRow = bubble->worldRow - vOff;
         bubble->screenCol = bubble->worldCol - hOff;
@@ -240,37 +244,61 @@ void updateBubble(BUBBLE* bubble) {
 }
 
 void drawBubble(BUBBLE* bubble) {
-    if (bubble->active) {
-        shadowOAM[10].attr0 = (ROWMASK & bubble->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
-        shadowOAM[10].attr1 = (COLMASK & bubble->screenCol) | ATTR1_SMALL;
-        shadowOAM[10].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(bubble->aniState * 2, bubble->curFrame * 2);
-    }
+        if (bubble->active) {
+            shadowOAM[10 + bubble->index].attr0 = (ROWMASK & bubble->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
+            shadowOAM[10 + bubble->index].attr1 = (COLMASK & bubble->screenCol) | ATTR1_SMALL;
+            shadowOAM[10 + bubble->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(bubble->aniState * 2, bubble->curFrame * 2);
+        }
 }
 
-void initEnemy() {
-    for (int i = 0; i < ENEMYCOUNT; i++) {
+void initEnemy(int enemyNum) {
+    for (int i = 0; i < enemyNum; i++) {
         enemies[i].width = 16;
         enemies[i].height = 16;
-        enemies[i].worldRow = (rand() % 200) + 16;
-        enemies[i].worldCol = (rand() % 200) + 16; 
-        enemies[i].active = 1;
+        while (!enemies[i].active) {
+            enemies[i].worldRow = (rand() % 220) + 16;
+            enemies[i].worldCol = (rand() % 220) + 16;
+            if (enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]) { // Bottom right corner
+                enemies[i].active = 1;
+            }
+        }
         enemies[i].aniCounter = 0;
         enemies[i].curFrame = 0;
         enemies[i].numFrames = 1;
-        if (i == 0 || i == 4 ) {
+        enemies[i].index = i;
+        if (i % 3 == 0 ) {
             enemies[i].aniState = EN_1;
-        } else if (i == 1 || i == 3) {
+        } else if (i % 3 == 1) {
             enemies[i].aniState = EN_2;
-        } else if (i == 2) {
+        } else if (i % 3 == 2) {
             enemies[i].aniState = EN_3;
         }
     }
 }
 
-void drawEnemy(ENEMY *enemy) {
+void drawEnemy(ENEMY* enemy) {
     if (enemy->active) {
-        shadowOAM[20].attr0 = (ROWMASK & enemy->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
-        shadowOAM[20].attr1 = (COLMASK & enemy->screenCol) | ATTR1_SMALL;
-        shadowOAM[20].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(enemy->aniState * 2, enemy->curFrame * 2);
+        shadowOAM[20 + enemy->index].attr0 = (ROWMASK & enemy->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
+        shadowOAM[20 + enemy->index].attr1 = (COLMASK & enemy->screenCol) | ATTR1_SMALL;
+        if (enemy->aniState == EN_1) {
+            shadowOAM[20 + enemy->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(10, 0);
+        }
+        if (enemy->aniState == EN_2) {
+            shadowOAM[20 + enemy->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(10, 2);
+        }
+        if (enemy->aniState == EN_3) {
+            shadowOAM[20 + enemy->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(10, 4);
+        }
+    }
+}
+
+void updateEnemy(ENEMY* enemy) {
+    if (enemy->active) {
+        enemy->screenRow = enemy->worldRow - vOff;
+        enemy->screenCol = enemy->worldCol - hOff;
     }
 }

@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "winscreen.h": "c"
+        "winscreen.h": "c",
+        "spritesheet.h": "c"
     }
 }

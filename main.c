@@ -3,7 +3,9 @@
 #include "myLib.h"
 #include "game.h"
 #include "spritesheet.h"
-#include "gamescreen.h"
+#include "house.h"
+// #include "gamebg1.h"
+// #include "gamebg2.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
@@ -143,9 +145,12 @@ void goToGame() {
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, gamescreenPal, PALETTE, gamescreenPalLen / 2);
-    DMANow(3, gamescreenTiles, &CHARBLOCK[0], gamescreenTilesLen / 2);
-    DMANow(3, gamescreenMap, &SCREENBLOCK[28], gamescreenMapLen / 2);
+    DMANow(3, housePal, PALETTE, housePalLen / 2);
+    DMANow(3, houseTiles, &CHARBLOCK[0], houseTilesLen / 2);
+    DMANow(3, houseMap, &SCREENBLOCK[28], houseMapLen / 2);
+    // DMANow(3, gamebg1Pal, PALETTE, gamebg1PalLen / 2);
+    // DMANow(3, gamebg1Tiles, &CHARBLOCK[0], gamebg1TilesLen / 2);
+    // DMANow(3, gamebg1Map, &SCREENBLOCK[28], gamebg1MapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;
@@ -166,8 +171,9 @@ void game() {
     if (BUTTON_PRESSED(BUTTON_START)) {
         goToPause();
     }
-    // Win state
-    // Lose state
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
 }
 
 void goToPause() {
