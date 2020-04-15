@@ -1544,6 +1544,7 @@ typedef struct {
     int worldCol;
     int screenRow;
     int screenCol;
+    int position;
     int width;
     int height;
     int active;
@@ -1552,6 +1553,7 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } ENEMY;
 
 
@@ -1569,11 +1571,12 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } BUBBLE;
-# 60 "game.h"
+# 65 "game.h"
 extern PLAYER penguin;
-extern ENEMY enemies[5];
-extern BUBBLE bubbles[3];
+extern ENEMY enemies[8];
+extern BUBBLE bubbles[16];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
@@ -1588,7 +1591,7 @@ void initPlayer();
 void updatePlayer();
 void animatePlayer();
 void drawPlayer();
-void initEnemy();
+void initEnemy(int);
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
 void initBubble();
@@ -1596,15 +1599,23 @@ void updateBubble(BUBBLE *);
 void drawBubble(BUBBLE *);
 void putBubble();
 # 6 "game.c" 2
+# 1 "collisionmap.h" 1
+# 20 "collisionmap.h"
+extern const unsigned short collisionmapBitmap[65536];
+# 7 "game.c" 2
 
 
 PLAYER penguin;
-ENEMY enemies[5];
-BUBBLE bubbles[3];
+ENEMY enemies[8];
+BUBBLE bubbles[16];
 int score;
 int lifeRemaining;
 int vOff;
 int hOff;
+int playerHOff;
+int playerVOff;
+int screenBlock;
+int sec;
 
 
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
@@ -1621,22 +1632,21 @@ void initGame() {
 
     initBubble();
 
-    initEnemy();
+    initEnemy(8);
 }
 
 
 void updateGame() {
-
-
+# 50 "game.c"
     updatePlayer();
 
 
+    for (int i = 0; i < 8; i++) {
+        updateEnemy(&enemies[i]);
+    }
 
 
-
-
-
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 16; i++) {
         updateBubble(&bubbles[i]);
     }
 }
@@ -1653,12 +1663,12 @@ void drawGame() {
     (*(volatile unsigned short *)0x04000012) = vOff;
 
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 8; i++) {
         drawEnemy(&enemies[i]);
     }
 
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 16; i++) {
         drawBubble(&bubbles[i]);
     }
 }
@@ -1682,7 +1692,9 @@ void initPlayer() {
 void updatePlayer() {
 
     if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<6)))) {
-        if (penguin.worldRow > 0) {
+        if (penguin.worldRow > 0
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * 256 + penguin.worldCol]
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * 256 + (penguin.worldCol + penguin.width - penguin.cDel)]) {
             penguin.worldRow -= penguin.rDel;
         }
 
@@ -1692,7 +1704,9 @@ void updatePlayer() {
     }
 
     if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<7)))) {
-        if (penguin.worldRow + penguin.height < 256) {
+        if (penguin.worldRow + penguin.height < 256
+            && collisionmapBitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol))]
+            && collisionmapBitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol + penguin.width - penguin.cDel))]) {
             penguin.worldRow += penguin.rDel;
         }
 
@@ -1702,7 +1716,9 @@ void updatePlayer() {
     }
 
     if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<5)))) {
-        if (penguin.worldCol > 0) {
+        if (penguin.worldCol > 0
+            && collisionmapBitmap[((penguin.worldRow)*(256)+(penguin.worldCol - penguin.cDel))]
+            && collisionmapBitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol - penguin.cDel))]) {
             penguin.worldCol -= penguin.cDel;
         }
 
@@ -1712,7 +1728,9 @@ void updatePlayer() {
     }
 
     if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<4)))) {
-        if (penguin.worldCol + penguin.width < 256) {
+        if (penguin.worldCol + penguin.width < 256
+            && collisionmapBitmap[((penguin.worldRow)*(256)+(penguin.worldCol + penguin.width))]
+            && collisionmapBitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol + penguin.width))]) {
             penguin.worldCol += penguin.cDel;
         }
 
@@ -1775,7 +1793,7 @@ void drawPlayer() {
 }
 
 void initBubble() {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 16; i++) {
         bubbles[i].width = 16;
         bubbles[i].height = 16;
         bubbles[i].aniCounter = 0;
@@ -1783,12 +1801,13 @@ void initBubble() {
         bubbles[i].curFrame = 0;
         bubbles[i].numFrames = 1;
         bubbles[i].active = 0;
+        bubbles[i].index = i;
     }
 }
 
 void putBubble() {
-    for (int i = 0; i < 3; i++) {
-        if (bubbles[i].active == 0) {
+    for (int i = 0; i < 16; i++) {
+        if (!bubbles[i].active) {
             bubbles[i].active = 1;
             if (penguin.aniState == PENFRONT) {
                 bubbles[i].worldRow = penguin.worldRow + penguin.height;
@@ -1808,7 +1827,6 @@ void putBubble() {
     }
 }
 void updateBubble(BUBBLE* bubble) {
-# 235 "game.c"
     if (bubble->active) {
         bubble->screenRow = bubble->worldRow - vOff;
         bubble->screenCol = bubble->worldCol - hOff;
@@ -1817,37 +1835,61 @@ void updateBubble(BUBBLE* bubble) {
 }
 
 void drawBubble(BUBBLE* bubble) {
-    if (bubble->active) {
-        shadowOAM[10].attr0 = (0xFF & bubble->screenRow) | (0<<13) | (0<<14);
-        shadowOAM[10].attr1 = (0x1FF & bubble->screenCol) | (1<<14);
-        shadowOAM[10].attr2 = ((0)<<12) | ((bubble->curFrame * 2)*32+(bubble->aniState * 2));
-    }
+        if (bubble->active) {
+            shadowOAM[10 + bubble->index].attr0 = (0xFF & bubble->screenRow) | (0<<13) | (0<<14);
+            shadowOAM[10 + bubble->index].attr1 = (0x1FF & bubble->screenCol) | (1<<14);
+            shadowOAM[10 + bubble->index].attr2 = ((0)<<12) | ((bubble->curFrame * 2)*32+(bubble->aniState * 2));
+        }
 }
 
-void initEnemy() {
-    for (int i = 0; i < 5; i++) {
+void initEnemy(int enemyNum) {
+    for (int i = 0; i < enemyNum; i++) {
         enemies[i].width = 16;
         enemies[i].height = 16;
-        enemies[i].worldRow = (rand() % 200) + 16;
-        enemies[i].worldCol = (rand() % 200) + 16;
-        enemies[i].active = 1;
+        while (!enemies[i].active) {
+            enemies[i].worldRow = (rand() % 220) + 16;
+            enemies[i].worldCol = (rand() % 220) + 16;
+            if (enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0
+                && collisionmapBitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol))]
+                && collisionmapBitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol + enemies[i].width))]
+                && collisionmapBitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol))]
+                && collisionmapBitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol + enemies[i].width))]) {
+                enemies[i].active = 1;
+            }
+        }
         enemies[i].aniCounter = 0;
         enemies[i].curFrame = 0;
         enemies[i].numFrames = 1;
-        if (i == 0 || i == 4 ) {
+        enemies[i].index = i;
+        if (i % 3 == 0 ) {
             enemies[i].aniState = EN_1;
-        } else if (i == 1 || i == 3) {
+        } else if (i % 3 == 1) {
             enemies[i].aniState = EN_2;
-        } else if (i == 2) {
+        } else if (i % 3 == 2) {
             enemies[i].aniState = EN_3;
         }
     }
 }
 
-void drawEnemy(ENEMY *enemy) {
+void drawEnemy(ENEMY* enemy) {
     if (enemy->active) {
-        shadowOAM[20].attr0 = (0xFF & enemy->screenRow) | (0<<13) | (0<<14);
-        shadowOAM[20].attr1 = (0x1FF & enemy->screenCol) | (1<<14);
-        shadowOAM[20].attr2 = ((0)<<12) | ((enemy->curFrame * 2)*32+(enemy->aniState * 2));
+        shadowOAM[20 + enemy->index].attr0 = (0xFF & enemy->screenRow) | (0<<13) | (0<<14);
+        shadowOAM[20 + enemy->index].attr1 = (0x1FF & enemy->screenCol) | (1<<14);
+        if (enemy->aniState == EN_1) {
+            shadowOAM[20 + enemy->index].attr2 = ((0)<<12) | ((0)*32+(10));
+        }
+        if (enemy->aniState == EN_2) {
+            shadowOAM[20 + enemy->index].attr2 = ((0)<<12) | ((2)*32+(10));
+        }
+        if (enemy->aniState == EN_3) {
+            shadowOAM[20 + enemy->index].attr2 = ((0)<<12) | ((4)*32+(10));
+        }
+    }
+}
+
+void updateEnemy(ENEMY* enemy) {
+    if (enemy->active) {
+        enemy->screenRow = enemy->worldRow - vOff;
+        enemy->screenCol = enemy->worldCol - hOff;
     }
 }

@@ -1358,6 +1358,7 @@ typedef struct {
     int worldCol;
     int screenRow;
     int screenCol;
+    int position;
     int width;
     int height;
     int active;
@@ -1366,6 +1367,7 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } ENEMY;
 
 
@@ -1383,11 +1385,12 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } BUBBLE;
-# 60 "game.h"
+# 65 "game.h"
 extern PLAYER penguin;
-extern ENEMY enemies[5];
-extern BUBBLE bubbles[3];
+extern ENEMY enemies[8];
+extern BUBBLE bubbles[16];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
@@ -1402,7 +1405,7 @@ void initPlayer();
 void updatePlayer();
 void animatePlayer();
 void drawPlayer();
-void initEnemy();
+void initEnemy(int);
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
 void initBubble();
@@ -1417,16 +1420,18 @@ extern const unsigned short spritesheetTiles[16384];
 
 extern const unsigned short spritesheetPal[256];
 # 6 "main.c" 2
-# 1 "gamescreen.h" 1
-# 22 "gamescreen.h"
-extern const unsigned short gamescreenTiles[48];
+# 1 "house.h" 1
+# 22 "house.h"
+extern const unsigned short houseTiles[896];
 
 
-extern const unsigned short gamescreenMap[1056];
+extern const unsigned short houseMap[1024];
 
 
-extern const unsigned short gamescreenPal[256];
+extern const unsigned short housePal[256];
 # 7 "main.c" 2
+
+
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
 extern const unsigned short splashscreenTiles[32];
@@ -1436,7 +1441,7 @@ extern const unsigned short splashscreenMap[1024];
 
 
 extern const unsigned short splashscreenPal[256];
-# 8 "main.c" 2
+# 10 "main.c" 2
 # 1 "instructionscreen.h" 1
 # 22 "instructionscreen.h"
 extern const unsigned short instructionscreenTiles[32];
@@ -1446,7 +1451,7 @@ extern const unsigned short instructionscreenMap[1024];
 
 
 extern const unsigned short instructionscreenPal[256];
-# 9 "main.c" 2
+# 11 "main.c" 2
 # 1 "pausescreen.h" 1
 # 22 "pausescreen.h"
 extern const unsigned short pausescreenTiles[32];
@@ -1456,7 +1461,7 @@ extern const unsigned short pausescreenMap[1024];
 
 
 extern const unsigned short pausescreenPal[256];
-# 10 "main.c" 2
+# 12 "main.c" 2
 # 1 "winscreen.h" 1
 # 22 "winscreen.h"
 extern const unsigned short winscreenTiles[32];
@@ -1466,7 +1471,7 @@ extern const unsigned short winscreenMap[1024];
 
 
 extern const unsigned short winscreenPal[256];
-# 11 "main.c" 2
+# 13 "main.c" 2
 # 1 "losescreen.h" 1
 # 22 "losescreen.h"
 extern const unsigned short losescreenTiles[32];
@@ -1476,7 +1481,7 @@ extern const unsigned short losescreenMap[1024];
 
 
 extern const unsigned short losescreenPal[256];
-# 12 "main.c" 2
+# 14 "main.c" 2
 
 
 
@@ -1611,9 +1616,12 @@ void goToGame() {
     waitForVBlank();
 
 
-    DMANow(3, gamescreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, gamescreenTiles, &((charblock *)0x6000000)[0], 96 / 2);
-    DMANow(3, gamescreenMap, &((screenblock *)0x6000000)[28], 2112 / 2);
+    DMANow(3, housePal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, houseTiles, &((charblock *)0x6000000)[0], 1792 / 2);
+    DMANow(3, houseMap, &((screenblock *)0x6000000)[28], 2048 / 2);
+
+
+
 
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;
@@ -1634,8 +1642,9 @@ void game() {
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToPause();
     }
-
-
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
 }
 
 void goToPause() {

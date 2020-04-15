@@ -23,6 +23,7 @@ typedef struct {
     int worldCol;
     int screenRow;
     int screenCol;
+    int position;
     int width;
     int height;
     int active;
@@ -31,6 +32,7 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } ENEMY;
 
 // Bubble Struct
@@ -48,18 +50,21 @@ typedef struct {
     int curFrame;
     int numFrames;
     int timer;
+    int index;
 } BUBBLE;
 
 // Constant
-#define ENEMYCOUNT 5
-#define BUBBLECOUNT 3
+#define ENEMYCOUNT1 8
+#define BUBBLECOUNT1 16
+#define ENEMYCOUNT2 13
+#define BUBBLECOUNT2 26 
 #define MAPHEIGHT 256
 #define MAPWIDTH 256
 
 // Variables
 extern PLAYER penguin;
-extern ENEMY enemies[ENEMYCOUNT];
-extern BUBBLE bubbles[BUBBLECOUNT];
+extern ENEMY enemies[ENEMYCOUNT1];
+extern BUBBLE bubbles[BUBBLECOUNT1];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
@@ -74,7 +79,7 @@ void initPlayer();
 void updatePlayer();
 void animatePlayer();
 void drawPlayer();
-void initEnemy();
+void initEnemy(int);
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
 void initBubble();
