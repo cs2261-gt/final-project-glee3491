@@ -5,6 +5,7 @@
 #include "game.h"
 #include "collisionmap.h"
 
+
 // Variables
 PLAYER penguin;
 ENEMY enemies[ENEMYCOUNT1];
@@ -16,7 +17,7 @@ int hOff;
 int playerHOff;
 int playerVOff;
 int screenBlock;
-int sec;
+// check how many enemies are on screen
 
 // Penguin animation states for aniState
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
@@ -24,7 +25,7 @@ enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDL
 void initGame() {
 
     vOff = 96;
-    hOff = 9;
+    hOff = 6;
 
     score = 0;
     lifeRemaining = 3;
@@ -46,8 +47,6 @@ void updateGame() {
     // }
 
     // if ()
-    // Update Player
-    updatePlayer();
 
     // // Update all the enemies
     for (int i = 0; i < ENEMYCOUNT1; i++) {
@@ -58,6 +57,8 @@ void updateGame() {
     for (int i = 0; i < BUBBLECOUNT1; i++) {
         updateBubble(&bubbles[i]);
     }
+    // Update Player
+    updatePlayer();
 }
 
 void drawGame() {
@@ -100,11 +101,25 @@ void initPlayer() {
 
 void updatePlayer() {
 
+    int bubbleCollide = 0;
+    int enemyCollide = 0;
     if (BUTTON_HELD(BUTTON_UP)) {
         if (penguin.worldRow > 0
             && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
             && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
-            penguin.worldRow -= penguin.rDel;
+                for (int i = 0; i < BUBBLECOUNT1; i++) {
+                    if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow - penguin.rDel, 16, 16)) {
+                        bubbleCollide = 1;
+                    }
+                }
+                for (int i = 0; i < ENEMYCOUNT1; i++) {
+                    if (collision(enemies[i].worldCol, enemies[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow - penguin.rDel, 16, 16)) {
+                        enemyCollide = 1;
+                    }
+                }
+                if (!bubbleCollide && !enemyCollide) {
+                    penguin.worldRow -= penguin.rDel;
+                }
         }
 
         if (vOff > 0 && penguin.screenRow < SCREENHEIGHT / 2) {
@@ -112,11 +127,23 @@ void updatePlayer() {
         }
     }
 
-    if (BUTTON_HELD(BUTTON_DOWN)) {
+    else if (BUTTON_HELD(BUTTON_DOWN)) {
         if (penguin.worldRow + penguin.height < 256
             && collisionmapBitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
             && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
-            penguin.worldRow += penguin.rDel;
+            for (int i = 0; i < BUBBLECOUNT1; i++) {
+                if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow + penguin.rDel, 16, 16)) {
+                    bubbleCollide = 1;
+                }
+            }
+            for (int i = 0; i < ENEMYCOUNT1; i++) {
+                if (collision(enemies[i].worldCol, enemies[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow + penguin.rDel, 16, 16)) {
+                    enemyCollide = 1;
+                }
+            }
+            if (!bubbleCollide && !enemyCollide) {
+                penguin.worldRow += penguin.rDel;
+            }
         }
 
         if (vOff < MAPHEIGHT - SCREENHEIGHT && penguin.screenRow > SCREENHEIGHT / 2) {
@@ -124,11 +151,23 @@ void updatePlayer() {
         }
     }
 
-    if (BUTTON_HELD(BUTTON_LEFT)) {
+    else if (BUTTON_HELD(BUTTON_LEFT)) {
         if (penguin.worldCol > 0
             && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
             && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
-            penguin.worldCol -= penguin.cDel;
+            for (int i = 0; i < BUBBLECOUNT1; i++) {
+                if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol - penguin.cDel, penguin.worldRow, 16, 16)) {
+                    bubbleCollide = 1;
+                }
+            }
+            for (int i = 0; i < ENEMYCOUNT1; i++) {
+                if (collision(enemies[i].worldCol, enemies[i].worldRow, 16, 16, penguin.worldCol - penguin.cDel, penguin.worldRow, 16, 16)) {
+                    enemyCollide = 1;
+                }
+            }
+            if (!bubbleCollide && !enemyCollide) {
+                 penguin.worldCol -= penguin.cDel;
+            }
         }
 
         if (hOff > 0 && penguin.screenCol < SCREENWIDTH / 2) {
@@ -136,24 +175,38 @@ void updatePlayer() {
         }
     }
 
-    if (BUTTON_HELD(BUTTON_RIGHT)) {
+    else if (BUTTON_HELD(BUTTON_RIGHT)) {
         if (penguin.worldCol + penguin.width < 256
             && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
             && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
-            penguin.worldCol += penguin.cDel;
+             for (int i = 0; i < BUBBLECOUNT1; i++) {
+                    if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol + penguin.cDel, penguin.worldRow, 16, 16)) {
+                        bubbleCollide = 1;
+                    }
+                }
+            for (int i = 0; i < ENEMYCOUNT1; i++) {
+                if (collision(enemies[i].worldCol, enemies[i].worldRow, 16, 16, penguin.worldCol + penguin.cDel, penguin.worldRow, 16, 16)) {
+                    enemyCollide = 1;
+                }
+            }
+            if (!bubbleCollide && !enemyCollide) {
+                penguin.worldCol += penguin.cDel;
+            }
         }
 
         if (hOff < MAPWIDTH - SCREENWIDTH && penguin.screenCol > SCREENWIDTH / 2) {
             hOff++;
         }
     }
-
-    if (BUTTON_PRESSED(BUTTON_A) && penguin.bubbleTimer >= 20) {
+    /*
+    QUESTION
+    I do have bubbleTimer to inactivate the bubble counting the frame. I thought? it deosn't work :(
+    Need some help with inactivating bubble and enemy after certain frame
+    */
+    if (BUTTON_PRESSED(BUTTON_A)) {
         putBubble();
-        penguin.bubbleTimer = 0;
     }
 
-    penguin.bubbleTimer++;
     penguin.screenRow = penguin.worldRow - vOff;
     penguin.screenCol = penguin.worldCol - hOff;
 
@@ -211,13 +264,13 @@ void initBubble() {
         bubbles[i].numFrames = 1;
         bubbles[i].active  = 0;
         bubbles[i].index = i;
+
     }
 }
 
 void putBubble() {
     for (int i = 0; i < BUBBLECOUNT1; i++) {
         if (!bubbles[i].active) {
-            bubbles[i].active = 1;
             if (penguin.aniState == PENFRONT) {
                 bubbles[i].worldRow = penguin.worldRow + penguin.height;
                 bubbles[i].worldCol = penguin.worldCol;
@@ -231,7 +284,13 @@ void putBubble() {
                 bubbles[i].worldRow = penguin.worldRow;
                 bubbles[i].worldCol = penguin.worldCol + penguin.width;
             }
-            break;
+            if (collisionmapBitmap[OFFSET(bubbles[i].worldCol,bubbles[i].worldRow, MAPWIDTH)] // Top left corner
+                && collisionmapBitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow, MAPWIDTH)] // Top right corner
+                && collisionmapBitmap[OFFSET(bubbles[i].worldCol, bubbles[i].worldRow + 10, MAPWIDTH)] // Botton left corner
+                && collisionmapBitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow + 10, MAPWIDTH)]) { // Bottom right corner
+                bubbles[i].active = 1;
+                break;
+            }
         }
     }
 }
@@ -240,7 +299,6 @@ void updateBubble(BUBBLE* bubble) {
         bubble->screenRow = bubble->worldRow - vOff;
         bubble->screenCol = bubble->worldCol - hOff;
     }
-    
 }
 
 void drawBubble(BUBBLE* bubble) {
@@ -256,6 +314,10 @@ void initEnemy(int enemyNum) {
         enemies[i].width = 16;
         enemies[i].height = 16;
         while (!enemies[i].active) {
+            /*
+            QUESTION
+            generating random row and col but not really random, the same enemies are in same place all the time
+            */
             enemies[i].worldRow = (rand() % 220) + 16;
             enemies[i].worldCol = (rand() % 220) + 16;
             if (enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0
@@ -277,6 +339,7 @@ void initEnemy(int enemyNum) {
         } else if (i % 3 == 2) {
             enemies[i].aniState = EN_3;
         }
+        enemies[i].erased = 0;
     }
 }
 
@@ -300,5 +363,18 @@ void updateEnemy(ENEMY* enemy) {
     if (enemy->active) {
         enemy->screenRow = enemy->worldRow - vOff;
         enemy->screenCol = enemy->worldCol - hOff;
+    }
+    /*
+    QUESTION
+    This for loop checks if the bubble and enemy collide but this changes bubble's row and col why?
+    */
+    for (int i = 0; i < BUBBLECOUNT1; i++) {
+        if (bubbles[i].active) {
+            if (collision(bubbles[i].worldCol, bubbles[i].worldRow, bubbles[i].width, bubbles[i].height, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
+                enemy->active = 0;
+                bubbles[i].active = 0;
+                score++;
+            }
+        }
     }
 }

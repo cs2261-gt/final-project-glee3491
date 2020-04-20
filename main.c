@@ -5,7 +5,7 @@
 #include "spritesheet.h"
 #include "house.h"
 // #include "gamebg1.h"
-// #include "gamebg2.h"
+ #include "gamebg2.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
@@ -21,6 +21,8 @@ void instruction();
 void goToInstruction();
 void game();
 void goToGame();
+void game2();
+void goToGame2();
 void pause();
 void goToPause();
 void win();
@@ -32,8 +34,9 @@ void goToLose();
 unsigned short buttons;
 unsigned short oldButtons;
 
-enum {SPLASH, INSTRUCTION, GAME, PAUSE, WIN, LOSE};
+enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
 int state;
+int gameState;
 
 int main() {
 
@@ -56,6 +59,9 @@ int main() {
                 break;
             case GAME:
                 game();
+                break;
+            case GAME2:
+                game2();
                 break;
             case PAUSE:
                 pause();
@@ -161,6 +167,7 @@ void goToGame() {
     DMANow(3, shadowOAM, OAM, 128 * 4);
 
     state = GAME;
+    gameState = GAME;
 }
 
 void game() {
@@ -171,8 +178,52 @@ void game() {
     if (BUTTON_PRESSED(BUTTON_START)) {
         goToPause();
     }
+    /*
+    lifeRemaining should decrease once the player gets hit by s bubble but could figure out how to count the frame
+    and inactivate the bubble
+    */
     if (lifeRemaining == 0) {
         goToLose();
+    }
+    /* scroe should increase on the enemy gets hit but a bubble but collision doesn't work
+    */
+    if (score > 3) {
+        goToGame2();
+    }
+}
+
+void goToGame2() {
+    waitForVBlank();
+
+    // Load game screen
+    DMANow(3, gamebg2Pal, PALETTE, gamebg2PalLen / 2);
+    DMANow(3, gamebg2Tiles, &CHARBLOCK[0], gamebg2TilesLen / 2);
+    DMANow(3, gamebg2Map, &SCREENBLOCK[28], gamebg2MapLen / 2);
+
+    REG_BG0VOFF = vOff;
+    REG_BG0HOFF = hOff;
+
+    DMANow(3, spritesheetTiles, &CHARBLOCK[4], spritesheetTilesLen / 2);
+    DMANow(3, spritesheetPal, SPRITEPALETTE, spritesheetPalLen / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, 128 * 4);
+
+    state = GAME2;
+    gameState = GAME2;
+}
+
+void game2() {
+    updateGame();
+    drawGame();
+    
+    if (BUTTON_PRESSED(BUTTON_START)) {
+        goToPause();
+    }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 7) {
+        goToWin();
     }
 }
 
@@ -194,7 +245,12 @@ void pause() {
     waitForVBlank();
 
     if (BUTTON_PRESSED(BUTTON_START)) {
-        goToGame();
+        if (gameState == GAME) {
+            goToGame();
+        }
+        if (gameState == GAME2) {
+            goToGame2();
+        }
     }
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
         main();

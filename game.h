@@ -27,6 +27,7 @@ typedef struct {
     int width;
     int height;
     int active;
+    int erased;
     int aniCounter;
     int aniState;
     int curFrame;
@@ -44,6 +45,7 @@ typedef struct {
     int width;
     int height;
     int active;
+    int erased;
     int aniCounter;
     int aniState;
     int preAniState;

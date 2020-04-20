@@ -1362,6 +1362,7 @@ typedef struct {
     int width;
     int height;
     int active;
+    int erased;
     int aniCounter;
     int aniState;
     int curFrame;
@@ -1379,6 +1380,7 @@ typedef struct {
     int width;
     int height;
     int active;
+    int erased;
     int aniCounter;
     int aniState;
     int preAniState;
@@ -1387,7 +1389,7 @@ typedef struct {
     int timer;
     int index;
 } BUBBLE;
-# 65 "game.h"
+# 67 "game.h"
 extern PLAYER penguin;
 extern ENEMY enemies[8];
 extern BUBBLE bubbles[16];
@@ -1431,7 +1433,16 @@ extern const unsigned short houseMap[1024];
 extern const unsigned short housePal[256];
 # 7 "main.c" 2
 
+# 1 "gamebg2.h" 1
+# 22 "gamebg2.h"
+extern const unsigned short gamebg2Tiles[48];
 
+
+extern const unsigned short gamebg2Map[6400];
+
+
+extern const unsigned short gamebg2Pal[256];
+# 9 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
 extern const unsigned short splashscreenTiles[32];
@@ -1492,6 +1503,8 @@ void instruction();
 void goToInstruction();
 void game();
 void goToGame();
+void game2();
+void goToGame2();
 void pause();
 void goToPause();
 void win();
@@ -1503,8 +1516,9 @@ void goToLose();
 unsigned short buttons;
 unsigned short oldButtons;
 
-enum {SPLASH, INSTRUCTION, GAME, PAUSE, WIN, LOSE};
+enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
 int state;
+int gameState;
 
 int main() {
 
@@ -1527,6 +1541,9 @@ int main() {
                 break;
             case GAME:
                 game();
+                break;
+            case GAME2:
+                game2();
                 break;
             case PAUSE:
                 pause();
@@ -1632,6 +1649,7 @@ void goToGame() {
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
 
     state = GAME;
+    gameState = GAME;
 }
 
 void game() {
@@ -1642,8 +1660,52 @@ void game() {
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToPause();
     }
+
+
+
+
     if (lifeRemaining == 0) {
         goToLose();
+    }
+
+
+    if (score > 3) {
+        goToGame2();
+    }
+}
+
+void goToGame2() {
+    waitForVBlank();
+
+
+    DMANow(3, gamebg2Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, gamebg2Tiles, &((charblock *)0x6000000)[0], 96 / 2);
+    DMANow(3, gamebg2Map, &((screenblock *)0x6000000)[28], 12800 / 2);
+
+    (*(volatile unsigned short *)0x04000012) = vOff;
+    (*(volatile unsigned short *)0x04000010) = hOff;
+
+    DMANow(3, spritesheetTiles, &((charblock *)0x6000000)[4], 32768 / 2);
+    DMANow(3, spritesheetPal, ((unsigned short *)0x5000200), 512 / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
+
+    state = GAME2;
+    gameState = GAME2;
+}
+
+void game2() {
+    updateGame();
+    drawGame();
+
+    if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
+        goToPause();
+    }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 7) {
+        goToWin();
     }
 }
 
@@ -1665,7 +1727,12 @@ void pause() {
     waitForVBlank();
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
-        goToGame();
+        if (gameState == GAME) {
+            goToGame();
+        }
+        if (gameState == GAME2) {
+            goToGame2();
+        }
     }
     if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
         main();
