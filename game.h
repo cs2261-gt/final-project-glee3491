@@ -27,12 +27,12 @@ typedef struct {
     int width;
     int height;
     int active;
-    int erased;
     int aniCounter;
     int aniState;
     int curFrame;
     int numFrames;
     int timer;
+    int set;
     int index;
 } ENEMY;
 
@@ -57,7 +57,7 @@ typedef struct {
 
 // Constant
 #define ENEMYCOUNT1 8
-#define BUBBLECOUNT1 16
+#define BUBBLECOUNT1 10
 #define ENEMYCOUNT2 13
 #define BUBBLECOUNT2 26 
 #define MAPHEIGHT 256
@@ -82,6 +82,7 @@ void updatePlayer();
 void animatePlayer();
 void drawPlayer();
 void initEnemy(int);
+void activateEnemy();
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
 void initBubble();

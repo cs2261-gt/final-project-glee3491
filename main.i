@@ -1362,12 +1362,12 @@ typedef struct {
     int width;
     int height;
     int active;
-    int erased;
     int aniCounter;
     int aniState;
     int curFrame;
     int numFrames;
     int timer;
+    int set;
     int index;
 } ENEMY;
 
@@ -1392,7 +1392,7 @@ typedef struct {
 # 67 "game.h"
 extern PLAYER penguin;
 extern ENEMY enemies[8];
-extern BUBBLE bubbles[16];
+extern BUBBLE bubbles[10];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
@@ -1408,6 +1408,7 @@ void updatePlayer();
 void animatePlayer();
 void drawPlayer();
 void initEnemy(int);
+void activateEnemy();
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
 void initBubble();
@@ -1432,7 +1433,16 @@ extern const unsigned short houseMap[1024];
 
 extern const unsigned short housePal[256];
 # 7 "main.c" 2
+# 1 "bg1.h" 1
+# 22 "bg1.h"
+extern const unsigned short bg1Tiles[32];
 
+
+extern const unsigned short bg1Map[1024];
+
+
+extern const unsigned short bg1Pal[256];
+# 8 "main.c" 2
 # 1 "gamebg2.h" 1
 # 22 "gamebg2.h"
 extern const unsigned short gamebg2Tiles[48];
@@ -1516,6 +1526,9 @@ void goToLose();
 unsigned short buttons;
 unsigned short oldButtons;
 
+
+int seed;
+
 enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
 int state;
 int gameState;
@@ -1591,11 +1604,12 @@ void goToSplash() {
 }
 
 void splash() {
-
+    seed++;
     waitForVBlank();
 
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
+        srand(seed);
         goToGame();
     }
     if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
@@ -1617,13 +1631,14 @@ void goToInstruction() {
 }
 
 void instruction() {
-
+    seed++;
     waitForVBlank();
 
     if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
         goToSplash();
     }
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
+        srand(seed);
         goToGame();
     }
 }
@@ -1633,9 +1648,9 @@ void goToGame() {
     waitForVBlank();
 
 
-    DMANow(3, housePal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, houseTiles, &((charblock *)0x6000000)[0], 1792 / 2);
-    DMANow(3, houseMap, &((screenblock *)0x6000000)[28], 2048 / 2);
+    DMANow(3, bg1Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, bg1Tiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, bg1Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
 
 
@@ -1678,9 +1693,9 @@ void goToGame2() {
     waitForVBlank();
 
 
-    DMANow(3, gamebg2Pal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, gamebg2Tiles, &((charblock *)0x6000000)[0], 96 / 2);
-    DMANow(3, gamebg2Map, &((screenblock *)0x6000000)[28], 12800 / 2);
+    DMANow(3, housePal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, houseTiles, &((charblock *)0x6000000)[0], 1792 / 2);
+    DMANow(3, houseMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;

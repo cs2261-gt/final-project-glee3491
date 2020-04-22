@@ -189,7 +189,7 @@ goToGame:
 	ldr	r1, .L16+8
 	mov	lr, pc
 	bx	r4
-	mov	r3, #896
+	mov	r3, #32
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L16+12
@@ -241,10 +241,10 @@ goToGame:
 .L16:
 	.word	waitForVBlank
 	.word	DMANow
-	.word	housePal
-	.word	houseTiles
+	.word	bg1Pal
+	.word	bg1Tiles
 	.word	100720640
-	.word	houseMap
+	.word	bg1Map
 	.word	vOff
 	.word	hOff
 	.word	100728832
@@ -266,41 +266,51 @@ splash:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, lr}
+	push	{r4, r5, r6, lr}
 	ldr	r4, .L30
-	ldr	r3, .L30+4
+	ldr	r3, [r4]
+	ldr	r5, .L30+4
+	add	r3, r3, #1
+	ldr	r2, .L30+8
+	str	r3, [r4]
 	mov	lr, pc
-	bx	r3
-	ldrh	r3, [r4]
+	bx	r2
+	ldrh	r3, [r5]
 	tst	r3, #8
 	beq	.L19
-	ldr	r2, .L30+8
+	ldr	r2, .L30+12
 	ldrh	r2, [r2]
 	tst	r2, #8
 	beq	.L28
 .L19:
 	tst	r3, #4
 	beq	.L18
-	ldr	r3, .L30+8
+	ldr	r3, .L30+12
 	ldrh	r3, [r3]
 	tst	r3, #4
 	beq	.L29
 .L18:
-	pop	{r4, lr}
+	pop	{r4, r5, r6, lr}
 	bx	lr
 .L29:
-	pop	{r4, lr}
+	pop	{r4, r5, r6, lr}
 	b	goToInstruction
 .L28:
+	ldr	r3, .L30+16
+	ldr	r0, [r4]
+	mov	lr, pc
+	bx	r3
 	bl	goToGame
-	ldrh	r3, [r4]
+	ldrh	r3, [r5]
 	b	.L19
 .L31:
 	.align	2
 .L30:
+	.word	seed
 	.word	oldButtons
 	.word	waitForVBlank
 	.word	buttons
+	.word	srand
 	.size	splash, .-splash
 	.align	2
 	.global	instruction
@@ -312,41 +322,51 @@ instruction:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, lr}
+	push	{r4, r5, r6, lr}
 	ldr	r4, .L44
-	ldr	r3, .L44+4
+	ldr	r3, [r4]
+	ldr	r5, .L44+4
+	add	r3, r3, #1
+	ldr	r2, .L44+8
+	str	r3, [r4]
 	mov	lr, pc
-	bx	r3
-	ldrh	r3, [r4]
+	bx	r2
+	ldrh	r3, [r5]
 	tst	r3, #4
 	beq	.L33
-	ldr	r2, .L44+8
+	ldr	r2, .L44+12
 	ldrh	r2, [r2]
 	tst	r2, #4
 	beq	.L42
 .L33:
 	tst	r3, #8
 	beq	.L32
-	ldr	r3, .L44+8
+	ldr	r3, .L44+12
 	ldrh	r3, [r3]
 	tst	r3, #8
 	beq	.L43
 .L32:
-	pop	{r4, lr}
+	pop	{r4, r5, r6, lr}
 	bx	lr
 .L43:
-	pop	{r4, lr}
+	ldr	r0, [r4]
+	ldr	r3, .L44+16
+	mov	lr, pc
+	bx	r3
+	pop	{r4, r5, r6, lr}
 	b	goToGame
 .L42:
 	bl	goToSplash
-	ldrh	r3, [r4]
+	ldrh	r3, [r5]
 	b	.L33
 .L45:
 	.align	2
 .L44:
+	.word	seed
 	.word	oldButtons
 	.word	waitForVBlank
 	.word	buttons
+	.word	srand
 	.size	instruction, .-instruction
 	.align	2
 	.global	goToGame2
@@ -369,13 +389,13 @@ goToGame2:
 	ldr	r1, .L48+8
 	mov	lr, pc
 	bx	r4
-	mov	r3, #48
+	mov	r3, #896
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L48+12
 	mov	lr, pc
 	bx	r4
-	mov	r3, #6400
+	mov	r3, #1024
 	mov	r0, #3
 	ldr	r2, .L48+16
 	ldr	r1, .L48+20
@@ -421,10 +441,10 @@ goToGame2:
 .L48:
 	.word	waitForVBlank
 	.word	DMANow
-	.word	gamebg2Pal
-	.word	gamebg2Tiles
+	.word	housePal
+	.word	houseTiles
 	.word	100720640
-	.word	gamebg2Map
+	.word	houseMap
 	.word	vOff
 	.word	hOff
 	.word	100728832
@@ -931,6 +951,7 @@ lose:
 	.size	lose, .-lose
 	.comm	gameState,4,4
 	.comm	state,4,4
+	.comm	seed,4,4
 	.comm	oldButtons,2,2
 	.comm	buttons,2,2
 	.ident	"GCC: (devkitARM release 53) 9.1.0"

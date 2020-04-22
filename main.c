@@ -4,8 +4,8 @@
 #include "game.h"
 #include "spritesheet.h"
 #include "house.h"
-// #include "gamebg1.h"
- #include "gamebg2.h"
+#include "bg1.h"
+#include "gamebg2.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
@@ -33,6 +33,9 @@ void goToLose();
 // Buttons
 unsigned short buttons;
 unsigned short oldButtons;
+
+// Random Seed
+int seed;
 
 enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
 int state;
@@ -109,11 +112,12 @@ void goToSplash() {
 }
 
 void splash() {
-
+    seed++;
     waitForVBlank();
 
     // State control
     if (BUTTON_PRESSED(BUTTON_START)) {
+        srand(seed);
         goToGame();
     }
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
@@ -135,13 +139,14 @@ void goToInstruction() {
 }
 
 void instruction() {
-
+    seed++;
     waitForVBlank();
 
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
         goToSplash();
     }
     if (BUTTON_PRESSED(BUTTON_START)) {
+        srand(seed);
         goToGame();
     }
 }
@@ -151,9 +156,9 @@ void goToGame() {
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, housePal, PALETTE, housePalLen / 2);
-    DMANow(3, houseTiles, &CHARBLOCK[0], houseTilesLen / 2);
-    DMANow(3, houseMap, &SCREENBLOCK[28], houseMapLen / 2);
+    DMANow(3, bg1Pal, PALETTE, bg1PalLen / 2);
+    DMANow(3, bg1Tiles, &CHARBLOCK[0], bg1TilesLen / 2);
+    DMANow(3, bg1Map, &SCREENBLOCK[28], bg1MapLen / 2);
     // DMANow(3, gamebg1Pal, PALETTE, gamebg1PalLen / 2);
     // DMANow(3, gamebg1Tiles, &CHARBLOCK[0], gamebg1TilesLen / 2);
     // DMANow(3, gamebg1Map, &SCREENBLOCK[28], gamebg1MapLen / 2);
@@ -196,9 +201,9 @@ void goToGame2() {
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, gamebg2Pal, PALETTE, gamebg2PalLen / 2);
-    DMANow(3, gamebg2Tiles, &CHARBLOCK[0], gamebg2TilesLen / 2);
-    DMANow(3, gamebg2Map, &SCREENBLOCK[28], gamebg2MapLen / 2);
+    DMANow(3, housePal, PALETTE, housePalLen / 2);
+    DMANow(3, houseTiles, &CHARBLOCK[0], houseTilesLen / 2);
+    DMANow(3, houseMap, &SCREENBLOCK[28], houseMapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;
