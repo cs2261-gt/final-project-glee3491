@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "winscreen.h": "c",
-        "spritesheet.h": "c"
+        "spritesheet.h": "c",
+        "splashscreen.h": "c",
+        "losescreen.h": "c"
     }
 }

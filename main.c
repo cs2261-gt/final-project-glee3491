@@ -2,15 +2,17 @@
 #include <stdio.h>
 #include "myLib.h"
 #include "game.h"
+#include "sound.h"
 #include "spritesheet.h"
 #include "house.h"
 #include "bg1.h"
-#include "gamebg2.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
 #include "winscreen.h"
 #include "losescreen.h"
+#include "huffnpuff.h"
+#include "bubble.h"
 
 
 // Game state prototype
@@ -29,6 +31,10 @@ void win();
 void goToWin();
 void lose();
 void goToLose();
+
+// Sounds
+SOUND soundA;
+SOUND soundB;
 
 // Buttons
 unsigned short buttons;
@@ -90,6 +96,8 @@ void initialize() {
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_SMALL;
 
     hideSprites();
+    setupSounds();
+    setupInterrupts();
 
     REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
 
@@ -107,6 +115,8 @@ void goToSplash() {
     DMANow(3, splashscreenPal, PALETTE, splashscreenPalLen / 2);
     DMANow(3, splashscreenTiles, &CHARBLOCK[0], splashscreenTilesLen / 2);
     DMANow(3, splashscreenMap, &SCREENBLOCK[28], splashscreenMapLen / 2);
+
+    playSoundA(huffnpuff, HUFFNPUFFLEN, 1);
 
     state = SPLASH;
 }
@@ -159,9 +169,6 @@ void goToGame() {
     DMANow(3, bg1Pal, PALETTE, bg1PalLen / 2);
     DMANow(3, bg1Tiles, &CHARBLOCK[0], bg1TilesLen / 2);
     DMANow(3, bg1Map, &SCREENBLOCK[28], bg1MapLen / 2);
-    // DMANow(3, gamebg1Pal, PALETTE, gamebg1PalLen / 2);
-    // DMANow(3, gamebg1Tiles, &CHARBLOCK[0], gamebg1TilesLen / 2);
-    // DMANow(3, gamebg1Map, &SCREENBLOCK[28], gamebg1MapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;
@@ -181,6 +188,7 @@ void game() {
     drawGame();
     
     if (BUTTON_PRESSED(BUTTON_START)) {
+        pauseSound();
         goToPause();
     }
     /*
@@ -188,12 +196,14 @@ void game() {
     and inactivate the bubble
     */
     if (lifeRemaining == 0) {
+        pauseSound();
         goToLose();
     }
     /* scroe should increase on the enemy gets hit but a bubble but collision doesn't work
     */
-    if (score > 3) {
-        goToGame2();
+    if (score > 7) {
+        pauseSound();
+        goToWin();
     }
 }
 
@@ -251,6 +261,7 @@ void pause() {
 
     if (BUTTON_PRESSED(BUTTON_START)) {
         if (gameState == GAME) {
+            unpauseSound();
             goToGame();
         }
         if (gameState == GAME2) {

@@ -48,13 +48,19 @@ goToSplash:
 	mov	lr, pc
 	bx	r4
 	mov	r3, #1024
-	ldr	r2, .L4+24
 	mov	r0, #3
+	ldr	r2, .L4+24
 	ldr	r1, .L4+28
 	mov	lr, pc
 	bx	r4
-	mov	r2, #0
+	mov	r2, #1
 	ldr	r3, .L4+32
+	ldr	r1, .L4+36
+	ldr	r0, .L4+40
+	mov	lr, pc
+	bx	r3
+	mov	r2, #0
+	ldr	r3, .L4+44
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -69,6 +75,9 @@ goToSplash:
 	.word	splashscreenTiles
 	.word	100720640
 	.word	splashscreenMap
+	.word	playSoundA
+	.word	1965888
+	.word	huffnpuff
 	.word	state
 	.size	goToSplash, .-goToSplash
 	.align	2
@@ -93,8 +102,14 @@ initialize:
 	ldr	r3, .L8+4
 	mov	lr, pc
 	bx	r3
-	ldr	r2, .L8+8
+	ldr	r3, .L8+8
+	mov	lr, pc
+	bx	r3
 	ldr	r3, .L8+12
+	mov	lr, pc
+	bx	r3
+	ldr	r2, .L8+16
+	ldr	r3, .L8+20
 	ldrh	r2, [r2, #48]
 	strh	r5, [r4]	@ movhi
 	pop	{r4, r5, r6, lr}
@@ -105,6 +120,8 @@ initialize:
 .L8:
 	.word	initGame
 	.word	hideSprites
+	.word	setupSounds
+	.word	setupInterrupts
 	.word	67109120
 	.word	buttons
 	.size	initialize, .-initialize
@@ -669,17 +686,26 @@ game:
 .L64:
 	ldr	r3, .L73+20
 	ldr	r3, [r3]
-	cmp	r3, #3
+	cmp	r3, #7
 	bgt	.L72
 	pop	{r4, lr}
 	bx	lr
 .L72:
+	ldr	r3, .L73+24
+	mov	lr, pc
+	bx	r3
 	pop	{r4, lr}
-	b	goToGame2
+	b	goToWin
 .L71:
+	ldr	r3, .L73+24
+	mov	lr, pc
+	bx	r3
 	bl	goToLose
 	b	.L64
 .L70:
+	ldr	r3, .L73+24
+	mov	lr, pc
+	bx	r3
 	bl	goToPause
 	b	.L63
 .L74:
@@ -691,6 +717,7 @@ game:
 	.word	buttons
 	.word	lifeRemaining
 	.word	score
+	.word	pauseSound
 	.size	game, .-game
 	.align	2
 	.global	game2
@@ -887,6 +914,9 @@ pause:
 	bl	goToGame2
 	b	.L115
 .L118:
+	ldr	r3, .L119+20
+	mov	lr, pc
+	bx	r3
 	bl	goToGame
 	ldr	r3, [r5]
 	b	.L105
@@ -898,6 +928,7 @@ pause:
 	.word	buttons
 	.word	gameState
 	.word	main
+	.word	unpauseSound
 	.size	pause, .-pause
 	.align	2
 	.global	win
@@ -954,4 +985,6 @@ lose:
 	.comm	seed,4,4
 	.comm	oldButtons,2,2
 	.comm	buttons,2,2
+	.comm	soundB,32,4
+	.comm	soundA,32,4
 	.ident	"GCC: (devkitARM release 53) 9.1.0"

@@ -3,7 +3,9 @@
 #include <time.h>
 #include "myLib.h"
 #include "game.h"
+#include "sound.h"
 #include "collisionmap.h"
+#include "bubble.h"
 
 
 // Variables
@@ -18,6 +20,9 @@ int playerHOff;
 int playerVOff;
 int screenBlock;
 // check how many enemies are on screen
+
+SOUND soundA;
+SOUND soundb;
 
 // Penguin animation states for aniState
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
@@ -90,7 +95,7 @@ void initPlayer() {
     penguin.rDel = 1;
     penguin.cDel = 1;
 
-    penguin.worldRow = SCREENHEIGHT / 2 - penguin.width / 2 + vOff;
+    penguin.worldRow = SCREENHEIGHT / 2 - penguin.width / 2 + vOff + 8;
     penguin.worldCol = SCREENWIDTH / 2 - penguin.height / 2 + hOff;
     penguin.aniCounter = 0;
     penguin.curFrame = 0;
@@ -218,6 +223,7 @@ void updatePlayer() {
     }
 
     if (BUTTON_PRESSED(BUTTON_A)) {
+        playSoundB(bubble, BUBBLELEN, 0);
         putBubble();
     }
 
@@ -228,6 +234,9 @@ void updatePlayer() {
         if (bubbles[i].timer == 320) {
             bubbles[i].active = 0;
             bubbles[i].timer = 0;
+        }
+        if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow, 16, 16)) {
+            lifeRemaining--;
         }
     }
     for (int i = 0; i < ENEMYCOUNT; i++) {

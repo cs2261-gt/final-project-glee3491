@@ -1602,10 +1602,31 @@ void updateBubble(BUBBLE *);
 void drawBubble(BUBBLE *);
 void putBubble();
 # 6 "game.c" 2
+# 1 "sound.h" 1
+SOUND soundA;
+SOUND soundB;
+
+
+
+void setupSounds();
+void playSoundA(const signed char* sound, int length, int loops);
+void playSoundB(const signed char* sound, int length, int loops);
+
+void setupInterrupts();
+void interruptHandler();
+
+void pauseSound();
+void unpauseSound();
+void stopSound();
+# 7 "game.c" 2
 # 1 "collisionmap.h" 1
 # 20 "collisionmap.h"
 extern const unsigned short collisionmapBitmap[65536];
-# 7 "game.c" 2
+# 8 "game.c" 2
+# 1 "bubble.h" 1
+# 20 "bubble.h"
+extern const unsigned char bubble[1734];
+# 9 "game.c" 2
 
 
 
@@ -1620,6 +1641,9 @@ int playerHOff;
 int playerVOff;
 int screenBlock;
 
+
+SOUND soundA;
+SOUND soundb;
 
 
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
@@ -1641,7 +1665,7 @@ void initGame() {
 
 
 void updateGame() {
-# 52 "game.c"
+# 57 "game.c"
     for (int i = 0; i < 3; i++) {
         updateEnemy(&enemies[i]);
     }
@@ -1683,7 +1707,7 @@ void initPlayer() {
     penguin.rDel = 1;
     penguin.cDel = 1;
 
-    penguin.worldRow = 160 / 2 - penguin.width / 2 + vOff;
+    penguin.worldRow = 160 / 2 - penguin.width / 2 + vOff + 8;
     penguin.worldCol = 240 / 2 - penguin.height / 2 + hOff;
     penguin.aniCounter = 0;
     penguin.curFrame = 0;
@@ -1811,6 +1835,7 @@ void updatePlayer() {
     }
 
     if ((!(~(oldButtons)&((1<<0))) && (~buttons & ((1<<0))))) {
+        playSoundB(bubble, 1734, 0);
         putBubble();
     }
 
@@ -1821,6 +1846,9 @@ void updatePlayer() {
         if (bubbles[i].timer == 320) {
             bubbles[i].active = 0;
             bubbles[i].timer = 0;
+        }
+        if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow, 16, 16)) {
+            lifeRemaining--;
         }
     }
     for (int i = 0; i < 3; i++) {

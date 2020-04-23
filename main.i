@@ -1416,13 +1416,30 @@ void updateBubble(BUBBLE *);
 void drawBubble(BUBBLE *);
 void putBubble();
 # 5 "main.c" 2
+# 1 "sound.h" 1
+SOUND soundA;
+SOUND soundB;
+
+
+
+void setupSounds();
+void playSoundA(const signed char* sound, int length, int loops);
+void playSoundB(const signed char* sound, int length, int loops);
+
+void setupInterrupts();
+void interruptHandler();
+
+void pauseSound();
+void unpauseSound();
+void stopSound();
+# 6 "main.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
 extern const unsigned short spritesheetTiles[16384];
 
 
 extern const unsigned short spritesheetPal[256];
-# 6 "main.c" 2
+# 7 "main.c" 2
 # 1 "house.h" 1
 # 22 "house.h"
 extern const unsigned short houseTiles[896];
@@ -1432,7 +1449,7 @@ extern const unsigned short houseMap[1024];
 
 
 extern const unsigned short housePal[256];
-# 7 "main.c" 2
+# 8 "main.c" 2
 # 1 "bg1.h" 1
 # 22 "bg1.h"
 extern const unsigned short bg1Tiles[32];
@@ -1442,16 +1459,6 @@ extern const unsigned short bg1Map[1024];
 
 
 extern const unsigned short bg1Pal[256];
-# 8 "main.c" 2
-# 1 "gamebg2.h" 1
-# 22 "gamebg2.h"
-extern const unsigned short gamebg2Tiles[48];
-
-
-extern const unsigned short gamebg2Map[6400];
-
-
-extern const unsigned short gamebg2Pal[256];
 # 9 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
@@ -1503,6 +1510,14 @@ extern const unsigned short losescreenMap[1024];
 
 extern const unsigned short losescreenPal[256];
 # 14 "main.c" 2
+# 1 "huffnpuff.h" 1
+# 20 "huffnpuff.h"
+extern const unsigned char huffnpuff[1965888];
+# 15 "main.c" 2
+# 1 "bubble.h" 1
+# 20 "bubble.h"
+extern const unsigned char bubble[1734];
+# 16 "main.c" 2
 
 
 
@@ -1521,6 +1536,10 @@ void win();
 void goToWin();
 void lose();
 void goToLose();
+
+
+SOUND soundA;
+SOUND soundB;
 
 
 unsigned short buttons;
@@ -1582,6 +1601,8 @@ void initialize() {
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (0<<14);
 
     hideSprites();
+    setupSounds();
+    setupInterrupts();
 
     (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
 
@@ -1599,6 +1620,8 @@ void goToSplash() {
     DMANow(3, splashscreenPal, ((unsigned short *)0x5000000), 512 / 2);
     DMANow(3, splashscreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
     DMANow(3, splashscreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
+
+    playSoundA(huffnpuff, 1965888, 1);
 
     state = SPLASH;
 }
@@ -1652,9 +1675,6 @@ void goToGame() {
     DMANow(3, bg1Tiles, &((charblock *)0x6000000)[0], 64 / 2);
     DMANow(3, bg1Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
-
-
-
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;
 
@@ -1673,6 +1693,7 @@ void game() {
     drawGame();
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
+        pauseSound();
         goToPause();
     }
 
@@ -1680,12 +1701,14 @@ void game() {
 
 
     if (lifeRemaining == 0) {
+        pauseSound();
         goToLose();
     }
 
 
-    if (score > 3) {
-        goToGame2();
+    if (score > 7) {
+        pauseSound();
+        goToWin();
     }
 }
 
@@ -1743,6 +1766,7 @@ void pause() {
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         if (gameState == GAME) {
+            unpauseSound();
             goToGame();
         }
         if (gameState == GAME2) {
