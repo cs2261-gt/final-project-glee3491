@@ -1389,10 +1389,10 @@ typedef struct {
     int timer;
     int index;
 } BUBBLE;
-# 67 "game.h"
+# 65 "game.h"
 extern PLAYER penguin;
-extern ENEMY enemies[8];
-extern BUBBLE bubbles[10];
+extern ENEMY enemies[3];
+extern BUBBLE bubbles[17];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];

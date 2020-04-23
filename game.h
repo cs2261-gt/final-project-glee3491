@@ -56,17 +56,15 @@ typedef struct {
 } BUBBLE;
 
 // Constant
-#define ENEMYCOUNT1 8
-#define BUBBLECOUNT1 10
-#define ENEMYCOUNT2 13
-#define BUBBLECOUNT2 26 
+#define ENEMYCOUNT 3
+#define BUBBLECOUNT 17
 #define MAPHEIGHT 256
 #define MAPWIDTH 256
 
 // Variables
 extern PLAYER penguin;
-extern ENEMY enemies[ENEMYCOUNT1];
-extern BUBBLE bubbles[BUBBLECOUNT1];
+extern ENEMY enemies[ENEMYCOUNT];
+extern BUBBLE bubbles[BUBBLECOUNT];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
