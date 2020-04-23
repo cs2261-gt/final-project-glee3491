@@ -233,10 +233,13 @@ void updatePlayer() {
             bubbles[i].active = 0;
             bubbles[i].timer = 0;
         }
-        if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow, 16, 16)) {
-            lifeRemaining--;
+        if (bubbles[i].active && bubbles[i].timer == 318) {
+            if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow, 16, 16)) {
+                lifeRemaining--;
+            }
         }
     }
+
     for (int i = 0; i < ENEMYCOUNT; i++) {
         if (enemies[i].set) {
             enemies[i].timer++;
@@ -423,7 +426,7 @@ void updateEnemy(ENEMY* enemy) {
     }
 
     for (int i = 0; i < BUBBLECOUNT; i++) {
-        if (bubbles[i].active && bubbles[i].timer == 318 && enemy->active) {
+        if (bubbles[i].active && bubbles[i].timer == 318) {
             if (collision(bubbles[i].worldCol, bubbles[i].worldRow, bubbles[i].width, bubbles[i].height, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
                 enemy->active = 0;
                 bubbles[i].active = 0;

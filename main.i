@@ -1472,7 +1472,7 @@ extern const unsigned short splashscreenPal[256];
 # 10 "main.c" 2
 # 1 "instructionscreen.h" 1
 # 22 "instructionscreen.h"
-extern const unsigned short instructionscreenTiles[32];
+extern const unsigned short instructionscreenTiles[3888];
 
 
 extern const unsigned short instructionscreenMap[1024];
@@ -1647,7 +1647,7 @@ void goToInstruction() {
 
 
     DMANow(3, instructionscreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, instructionscreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, instructionscreenTiles, &((charblock *)0x6000000)[0], 7776 / 2);
     DMANow(3, instructionscreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     state = INSTRUCTION;
@@ -1739,12 +1739,12 @@ void game2() {
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToPause();
     }
-    if (lifeRemaining == 0) {
-        goToLose();
-    }
-    if (score > 7) {
-        goToWin();
-    }
+
+
+
+
+
+
 }
 
 void goToPause() {
