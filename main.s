@@ -41,7 +41,7 @@ goToSplash:
 	ldr	r1, .L4+16
 	mov	lr, pc
 	bx	r4
-	mov	r3, #32
+	mov	r3, #880
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L4+20
@@ -497,13 +497,17 @@ goToPause:
 	ldr	r1, .L52+12
 	mov	lr, pc
 	bx	r4
+	mov	r1, #67108864
+	mov	r0, #0
 	mov	r3, #256
+	strh	r0, [r1, #18]	@ movhi
 	mov	r2, #83886080
+	strh	r0, [r1, #16]	@ movhi
 	mov	r0, #3
 	ldr	r1, .L52+16
 	mov	lr, pc
 	bx	r4
-	mov	r3, #32
+	mov	r3, #768
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L52+20
@@ -557,13 +561,17 @@ goToWin:
 	ldr	r1, .L56+12
 	mov	lr, pc
 	bx	r4
+	mov	r1, #67108864
+	mov	r0, #0
 	mov	r3, #256
+	strh	r0, [r1, #18]	@ movhi
 	mov	r2, #83886080
+	strh	r0, [r1, #16]	@ movhi
 	mov	r0, #3
 	ldr	r1, .L56+16
 	mov	lr, pc
 	bx	r4
-	mov	r3, #32
+	mov	r3, #576
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L56+20
@@ -617,13 +625,17 @@ goToLose:
 	ldr	r1, .L60+12
 	mov	lr, pc
 	bx	r4
+	mov	r1, #67108864
+	mov	r0, #0
 	mov	r3, #256
+	strh	r0, [r1, #18]	@ movhi
 	mov	r2, #83886080
+	strh	r0, [r1, #16]	@ movhi
 	mov	r0, #3
 	ldr	r1, .L60+16
 	mov	lr, pc
 	bx	r4
-	mov	r3, #32
+	mov	r3, #592
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L60+20

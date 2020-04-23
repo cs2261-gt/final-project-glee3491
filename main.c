@@ -247,6 +247,9 @@ void goToPause() {
     waitForVBlank();
     DMANow(3, shadowOAM, OAM, 512);
 
+    REG_BG0VOFF = 0;
+    REG_BG0HOFF = 0;
+
     // Load pause screen
     DMANow(3, pausescreenPal, PALETTE, pausescreenPalLen / 2);
     DMANow(3, pausescreenTiles, &CHARBLOCK[0], pausescreenTilesLen / 2);
@@ -278,6 +281,9 @@ void goToWin() {
     waitForVBlank();
     DMANow(3, shadowOAM, OAM, 512);
 
+    REG_BG0VOFF = 0;
+    REG_BG0HOFF = 0;
+
     // Load win screen
     DMANow(3, winscreenPal, PALETTE, winscreenPalLen / 2);
     DMANow(3, winscreenTiles, &CHARBLOCK[0], winscreenTilesLen / 2);
@@ -300,6 +306,9 @@ void goToLose() {
     waitForVBlank();
     DMANow(3, shadowOAM, OAM, 512);
 
+    REG_BG0VOFF = 0;
+    REG_BG0HOFF = 0;
+    
     // Load win screen
     DMANow(3, losescreenPal, PALETTE, losescreenPalLen / 2);
     DMANow(3, losescreenTiles, &CHARBLOCK[0], losescreenTilesLen / 2);

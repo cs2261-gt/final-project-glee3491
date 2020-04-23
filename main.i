@@ -1462,7 +1462,7 @@ extern const unsigned short bg1Pal[256];
 # 9 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
-extern const unsigned short splashscreenTiles[32];
+extern const unsigned short splashscreenTiles[880];
 
 
 extern const unsigned short splashscreenMap[1024];
@@ -1482,7 +1482,7 @@ extern const unsigned short instructionscreenPal[256];
 # 11 "main.c" 2
 # 1 "pausescreen.h" 1
 # 22 "pausescreen.h"
-extern const unsigned short pausescreenTiles[32];
+extern const unsigned short pausescreenTiles[768];
 
 
 extern const unsigned short pausescreenMap[1024];
@@ -1492,7 +1492,7 @@ extern const unsigned short pausescreenPal[256];
 # 12 "main.c" 2
 # 1 "winscreen.h" 1
 # 22 "winscreen.h"
-extern const unsigned short winscreenTiles[32];
+extern const unsigned short winscreenTiles[576];
 
 
 extern const unsigned short winscreenMap[1024];
@@ -1502,7 +1502,7 @@ extern const unsigned short winscreenPal[256];
 # 13 "main.c" 2
 # 1 "losescreen.h" 1
 # 22 "losescreen.h"
-extern const unsigned short losescreenTiles[32];
+extern const unsigned short losescreenTiles[592];
 
 
 extern const unsigned short losescreenMap[1024];
@@ -1618,7 +1618,7 @@ void goToSplash() {
 
 
     DMANow(3, splashscreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, splashscreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, splashscreenTiles, &((charblock *)0x6000000)[0], 1760 / 2);
     DMANow(3, splashscreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     playSoundA(huffnpuff, 1965888, 1);
@@ -1752,9 +1752,12 @@ void goToPause() {
     waitForVBlank();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
+    (*(volatile unsigned short *)0x04000012) = 0;
+    (*(volatile unsigned short *)0x04000010) = 0;
+
 
     DMANow(3, pausescreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, pausescreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, pausescreenTiles, &((charblock *)0x6000000)[0], 1536 / 2);
     DMANow(3, pausescreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     state = PAUSE;
@@ -1783,9 +1786,12 @@ void goToWin() {
     waitForVBlank();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
+    (*(volatile unsigned short *)0x04000012) = 0;
+    (*(volatile unsigned short *)0x04000010) = 0;
+
 
     DMANow(3, winscreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, winscreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, winscreenTiles, &((charblock *)0x6000000)[0], 1152 / 2);
     DMANow(3, winscreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     state = WIN;
@@ -1805,9 +1811,12 @@ void goToLose() {
     waitForVBlank();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
+    (*(volatile unsigned short *)0x04000012) = 0;
+    (*(volatile unsigned short *)0x04000010) = 0;
+
 
     DMANow(3, losescreenPal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, losescreenTiles, &((charblock *)0x6000000)[0], 64 / 2);
+    DMANow(3, losescreenTiles, &((charblock *)0x6000000)[0], 1184 / 2);
     DMANow(3, losescreenMap, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     state = LOSE;

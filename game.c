@@ -51,8 +51,6 @@ void updateGame() {
     //     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(screenBlock) | BG_SIZE_LARGE | BG_4BPP; 
     // }
 
-    // if ()
-
     // // Update all the enemies
     for (int i = 0; i < ENEMYCOUNT; i++) {
         updateEnemy(&enemies[i]);

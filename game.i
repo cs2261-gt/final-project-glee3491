@@ -1665,7 +1665,7 @@ void initGame() {
 
 
 void updateGame() {
-# 57 "game.c"
+# 55 "game.c"
     for (int i = 0; i < 3; i++) {
         updateEnemy(&enemies[i]);
     }
