@@ -19,6 +19,9 @@ int hOff;
 int playerHOff;
 int playerVOff;
 int screenBlock;
+int timer;
+
+
 // check how many enemies are on screen
 
 SOUND soundA;
@@ -254,7 +257,9 @@ void updatePlayer() {
     penguin.screenCol = penguin.worldCol - hOff;
 
     animatePlayer(); 
-    activateEnemy();
+    if (timer % 200 == 0) {
+        activateEnemy();
+    }
 }
 
 void animatePlayer() {
@@ -393,9 +398,10 @@ void initEnemy(int enemyNum) {
 }
 
 void activateEnemy() {
-    for (int i = 1; i < ENEMYCOUNT; i++) {
-        if (!enemies[i].active && enemies[i].timer == 200) {
+    for (int i = 0; i < ENEMYCOUNT; i++) {
+        if (!enemies[i].active) {
             enemies[i].active = 1;
+            break;
         }
     }
 }

@@ -1640,6 +1640,9 @@ int hOff;
 int playerHOff;
 int playerVOff;
 int screenBlock;
+int timer;
+
+
 
 
 SOUND soundA;
@@ -1665,7 +1668,7 @@ void initGame() {
 
 
 void updateGame() {
-# 55 "game.c"
+# 58 "game.c"
     for (int i = 0; i < 3; i++) {
         updateEnemy(&enemies[i]);
     }
@@ -1868,7 +1871,9 @@ void updatePlayer() {
     penguin.screenCol = penguin.worldCol - hOff;
 
     animatePlayer();
-    activateEnemy();
+    if (timer % 200 == 0) {
+        activateEnemy();
+    }
 }
 
 void animatePlayer() {
@@ -2007,9 +2012,10 @@ void initEnemy(int enemyNum) {
 }
 
 void activateEnemy() {
-    for (int i = 1; i < 3; i++) {
-        if (!enemies[i].active && enemies[i].timer == 200) {
+    for (int i = 0; i < 3; i++) {
+        if (!enemies[i].active) {
             enemies[i].active = 1;
+            break;
         }
     }
 }

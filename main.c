@@ -145,7 +145,7 @@ void goToInstruction() {
     DMANow(3, instructionscreenTiles, &CHARBLOCK[0], instructionscreenTilesLen / 2);
     DMANow(3, instructionscreenMap, &SCREENBLOCK[28], instructionscreenMapLen / 2);
 
-    state = INSTRUCTION;+
+    state = INSTRUCTION;
 }
 
 void instruction() {
