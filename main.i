@@ -1450,15 +1450,15 @@ extern const unsigned short houseMap[1024];
 
 extern const unsigned short housePal[256];
 # 8 "main.c" 2
-# 1 "bg1.h" 1
-# 22 "bg1.h"
-extern const unsigned short bg1Tiles[32];
+# 1 "gamebg3.h" 1
+# 22 "gamebg3.h"
+extern const unsigned short gamebg3Tiles[432];
 
 
-extern const unsigned short bg1Map[1024];
+extern const unsigned short gamebg3Map[1024];
 
 
-extern const unsigned short bg1Pal[256];
+extern const unsigned short gamebg3Pal[256];
 # 9 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
@@ -1671,9 +1671,9 @@ void goToGame() {
     waitForVBlank();
 
 
-    DMANow(3, bg1Pal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, bg1Tiles, &((charblock *)0x6000000)[0], 64 / 2);
-    DMANow(3, bg1Map, &((screenblock *)0x6000000)[28], 2048 / 2);
+    DMANow(3, gamebg3Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, gamebg3Tiles, &((charblock *)0x6000000)[0], 864 / 2);
+    DMANow(3, gamebg3Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;

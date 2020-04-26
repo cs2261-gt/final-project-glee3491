@@ -3,6 +3,8 @@
         "winscreen.h": "c",
         "spritesheet.h": "c",
         "splashscreen.h": "c",
-        "losescreen.h": "c"
+        "losescreen.h": "c",
+        "collisionmap.h": "c",
+        "gamebg1.h": "c"
     }
 }

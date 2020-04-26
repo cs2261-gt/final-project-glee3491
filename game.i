@@ -1619,9 +1619,9 @@ void pauseSound();
 void unpauseSound();
 void stopSound();
 # 7 "game.c" 2
-# 1 "collisionmap.h" 1
-# 20 "collisionmap.h"
-extern const unsigned short collisionmapBitmap[65536];
+# 1 "collisionmap3.h" 1
+# 20 "collisionmap3.h"
+extern const unsigned short collisionmap3Bitmap[65536];
 # 8 "game.c" 2
 # 1 "bubble.h" 1
 # 20 "bubble.h"
@@ -1668,7 +1668,8 @@ void initGame() {
 
 
 void updateGame() {
-# 58 "game.c"
+
+
     for (int i = 0; i < 3; i++) {
         updateEnemy(&enemies[i]);
     }
@@ -1725,8 +1726,8 @@ void updatePlayer() {
     int enemyCollide = 0;
     if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<6)))) {
         if (penguin.worldRow > 0
-            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * 256 + penguin.worldCol]
-            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * 256 + (penguin.worldCol + penguin.width - penguin.cDel)]) {
+            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * 256 + penguin.worldCol]
+            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * 256 + (penguin.worldCol + penguin.width - penguin.cDel)]) {
                 for (int i = 0; i < 17; i++) {
                     if (bubbles[i].active) {
                          if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow - penguin.rDel, 16, 16)) {
@@ -1755,8 +1756,8 @@ void updatePlayer() {
 
     else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<7)))) {
         if (penguin.worldRow + penguin.height < 256
-            && collisionmapBitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol))]
-            && collisionmapBitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol + penguin.width - penguin.cDel))]) {
+            && collisionmap3Bitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol))]
+            && collisionmap3Bitmap[((penguin.worldRow + penguin.height)*(256)+(penguin.worldCol + penguin.width - penguin.cDel))]) {
             for (int i = 0; i < 17; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow + penguin.rDel, 16, 16)) {
@@ -1783,8 +1784,8 @@ void updatePlayer() {
 
     else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<5)))) {
         if (penguin.worldCol > 0
-            && collisionmapBitmap[((penguin.worldRow)*(256)+(penguin.worldCol - penguin.cDel))]
-            && collisionmapBitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol - penguin.cDel))]) {
+            && collisionmap3Bitmap[((penguin.worldRow)*(256)+(penguin.worldCol - penguin.cDel))]
+            && collisionmap3Bitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol - penguin.cDel))]) {
             for (int i = 0; i < 17; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol - penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -1811,8 +1812,8 @@ void updatePlayer() {
 
     else if ((~((*(volatile unsigned short *)0x04000130)) & ((1<<4)))) {
         if (penguin.worldCol + penguin.width < 256
-            && collisionmapBitmap[((penguin.worldRow)*(256)+(penguin.worldCol + penguin.width))]
-            && collisionmapBitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol + penguin.width))]) {
+            && collisionmap3Bitmap[((penguin.worldRow)*(256)+(penguin.worldCol + penguin.width))]
+            && collisionmap3Bitmap[((penguin.worldRow + penguin.height - penguin.rDel)*(256)+(penguin.worldCol + penguin.width))]) {
              for (int i = 0; i < 17; i++) {
                     if (bubbles[i].active) {
                         if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol + penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -1947,10 +1948,10 @@ void putBubble() {
                 bubbles[i].worldRow = penguin.worldRow;
                 bubbles[i].worldCol = penguin.worldCol + penguin.width;
             }
-            if (collisionmapBitmap[((bubbles[i].worldRow)*(256)+(bubbles[i].worldCol))]
-                && collisionmapBitmap[((bubbles[i].worldRow)*(256)+(bubbles[i].worldCol + 10))]
-                && collisionmapBitmap[((bubbles[i].worldRow + 10)*(256)+(bubbles[i].worldCol))]
-                && collisionmapBitmap[((bubbles[i].worldRow + 10)*(256)+(bubbles[i].worldCol + 10))]) {
+            if (collisionmap3Bitmap[((bubbles[i].worldRow)*(256)+(bubbles[i].worldCol))]
+                && collisionmap3Bitmap[((bubbles[i].worldRow)*(256)+(bubbles[i].worldCol + 10))]
+                && collisionmap3Bitmap[((bubbles[i].worldRow + 10)*(256)+(bubbles[i].worldCol))]
+                && collisionmap3Bitmap[((bubbles[i].worldRow + 10)*(256)+(bubbles[i].worldCol + 10))]) {
                 bubbles[i].active = 1;
                 break;
             }
@@ -1993,10 +1994,11 @@ void initEnemy(int enemyNum) {
         while (!enemies[i].set) {
             enemies[i].worldRow = (rand() % 220) + 16;
             enemies[i].worldCol = (rand() % 220) + 16;
-            if (collisionmapBitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol))]
-                && collisionmapBitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol + enemies[i].width))]
-                && collisionmapBitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol))]
-                && collisionmapBitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol + enemies[i].width))]) {
+            if (collisionmap3Bitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol))]
+                && collisionmap3Bitmap[((enemies[i].worldRow)*(256)+(enemies[i].worldCol + enemies[i].width))]
+                && collisionmap3Bitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol))]
+                && collisionmap3Bitmap[((enemies[i].worldRow + enemies[i].height)*(256)+(enemies[i].worldCol + enemies[i].width))]
+                && enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0) {
                 enemies[i].set = 1;
             }
         }

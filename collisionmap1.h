@@ -1,24 +1,24 @@
 
-//{{BLOCK(collisionmap)
+//{{BLOCK(collisionmap1)
 
 //======================================================================
 //
-//	collisionmap, 256x256@16, 
+//	collisionmap1, 256x256@16, 
 //	+ bitmap not compressed
 //	Total size: 131072 = 131072
 //
-//	Time-stamp: 2020-04-22, 05:03:17
+//	Time-stamp: 2020-04-26, 09:23:14
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.3
 //	( http://www.coranac.com/projects/#grit )
 //
 //======================================================================
 
-#ifndef GRIT_COLLISIONMAP_H
-#define GRIT_COLLISIONMAP_H
+#ifndef GRIT_COLLISIONMAP1_H
+#define GRIT_COLLISIONMAP1_H
 
-#define collisionmapBitmapLen 131072
-extern const unsigned short collisionmapBitmap[65536];
+#define collisionmap1BitmapLen 131072
+extern const unsigned short collisionmap1Bitmap[65536];
 
-#endif // GRIT_COLLISIONMAP_H
+#endif // GRIT_COLLISIONMAP1_H
 
-//}}BLOCK(collisionmap)
+//}}BLOCK(collisionmap1)

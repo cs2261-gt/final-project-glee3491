@@ -358,7 +358,7 @@ putBubble:
 .L67:
 	.word	penguin
 	.word	bubbles
-	.word	collisionmapBitmap
+	.word	collisionmap3Bitmap
 	.size	putBubble, .-putBubble
 	.align	2
 	.global	updatePlayer
@@ -958,7 +958,7 @@ updatePlayer:
 .L244:
 	.word	67109120
 	.word	penguin
-	.word	collisionmapBitmap
+	.word	collisionmap3Bitmap
 	.word	bubbles
 	.word	collision
 	.word	enemies
@@ -1046,13 +1046,13 @@ initEnemy:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	subs	r8, r0, #0
-	ldr	r9, .L285
+	ldr	r9, .L286
 	ble	.L258
 	mov	r7, #0
 	mov	r10, r9
-	ldr	r5, .L285+4
-	ldr	r6, .L285+8
-	ldr	r4, .L285+12
+	ldr	r5, .L286+4
+	ldr	r6, .L286+8
+	ldr	r4, .L286+12
 .L266:
 	mov	r3, #0
 	mov	r2, #14
@@ -1085,37 +1085,42 @@ initEnemy:
 	rsb	r2, r3, r3, lsl #3
 	rsb	r3, r3, r2, lsl #3
 	sub	r0, r0, r3, lsl #2
-	ldr	r3, [r10]
+	ldr	r2, [r10]
 	add	r0, r0, #16
-	add	r2, r0, r3, lsl #8
-	lsl	r2, r2, #1
-	ldrh	r2, [r6, r2]
-	cmp	r2, #0
-	str	r0, [r10, #4]
-	lsl	r1, r3, #8
-	beq	.L260
-	ldr	r2, [r10, #20]
-	add	r2, r0, r2
-	add	r1, r1, r2
-	lsl	r1, r1, #1
-	ldrh	r1, [r6, r1]
-	cmp	r1, #0
-	beq	.L260
-	ldr	r1, [r10, #24]
-	add	r3, r3, r1
-	add	r0, r0, r3, lsl #8
-	lsl	r0, r0, #1
-	ldrh	r1, [r6, r0]
-	lsl	r3, r3, #8
-	add	r3, r2, r3
-	cmp	r1, #0
+	add	r3, r0, r2, lsl #8
 	lsl	r3, r3, #1
+	ldrh	r3, [r6, r3]
+	cmp	r3, #0
+	str	r0, [r10, #4]
+	lsl	r3, r2, #8
 	beq	.L260
+	ldr	r1, [r10, #20]
+	add	r1, r0, r1
+	add	r3, r3, r1
+	lsl	r3, r3, #1
 	ldrh	r3, [r6, r3]
 	cmp	r3, #0
 	beq	.L260
-	mov	r3, #1
-	str	r3, [r10, #52]
+	ldr	r3, [r10, #24]
+	add	r3, r2, r3
+	add	ip, r0, r3, lsl #8
+	lsl	ip, ip, #1
+	ldrh	ip, [r6, ip]
+	lsl	r3, r3, #8
+	add	r1, r1, r3
+	cmp	ip, #0
+	lsl	r1, r1, #1
+	beq	.L260
+	ldrh	r3, [r6, r1]
+	cmp	r3, #0
+	orr	r0, r2, r0
+	beq	.L260
+	tst	r0, #15
+	beq	.L285
+.L260:
+	ldr	r3, [r10, #52]
+	cmp	r3, #0
+	beq	.L262
 .L261:
 	cmp	r7, #0
 	moveq	r3, #6
@@ -1136,17 +1141,16 @@ initEnemy:
 	str	r3, [r9, #28]
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	bx	lr
-.L260:
-	ldr	r3, [r10, #52]
-	cmp	r3, #0
-	beq	.L262
-	b	.L261
-.L286:
-	.align	2
 .L285:
+	mov	r3, #1
+	str	r3, [r10, #52]
+	b	.L261
+.L287:
+	.align	2
+.L286:
 	.word	enemies
 	.word	rand
-	.word	collisionmapBitmap
+	.word	collisionmap3Bitmap
 	.word	156180629
 	.size	initEnemy, .-initEnemy
 	.align	2
@@ -1167,10 +1171,10 @@ initGame:
 	mov	fp, #176
 	mov	r10, #118
 	mov	r9, #20
-	ldr	lr, .L291
+	ldr	lr, .L292
 	mov	r8, #96
 	str	r4, [lr]
-	ldr	lr, .L291+4
+	ldr	lr, .L292+4
 	mov	r3, r4
 	str	r4, [lr, #36]
 	str	r4, [lr, #48]
@@ -1187,14 +1191,14 @@ initGame:
 	str	r5, [lr, #16]
 	str	r5, [lr, #20]
 	str	r7, [lr, #52]
-	ldr	lr, .L291+8
+	ldr	lr, .L292+8
 	str	r7, [lr]
-	ldr	lr, .L291+12
+	ldr	lr, .L292+12
 	str	r8, [lr]
-	ldr	lr, .L291+16
+	ldr	lr, .L292+16
 	str	r4, [lr]
-	ldr	lr, .L291+20
-.L288:
+	ldr	lr, .L292+20
+.L289:
 	str	r3, [lr, #56]
 	add	r3, r3, #1
 	cmp	r3, #17
@@ -1206,13 +1210,13 @@ initGame:
 	str	ip, [lr, #48]
 	str	r2, [lr, #24]
 	add	lr, lr, #60
-	bne	.L288
+	bne	.L289
 	mov	r0, #3
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	b	initEnemy
-.L292:
+.L293:
 	.align	2
-.L291:
+.L292:
 	.word	score
 	.word	penguin
 	.word	lifeRemaining
@@ -1231,29 +1235,29 @@ activateEnemy:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, .L301
+	ldr	r3, .L302
 	ldr	r2, [r3, #28]
 	cmp	r2, #0
-	beq	.L294
+	beq	.L295
 	ldr	r2, [r3, #88]
 	cmp	r2, #0
-	beq	.L296
+	beq	.L297
 	ldr	r2, [r3, #148]
 	cmp	r2, #0
 	moveq	r2, #2
 	bxne	lr
-.L294:
+.L295:
 	mov	r1, #1
 	rsb	r2, r2, r2, lsl #4
 	add	r3, r3, r2, lsl #2
 	str	r1, [r3, #28]
 	bx	lr
-.L296:
+.L297:
 	mov	r2, #1
-	b	.L294
-.L302:
+	b	.L295
+.L303:
 	.align	2
-.L301:
+.L302:
 	.word	enemies
 	.size	activateEnemy, .-activateEnemy
 	.align	2
@@ -1270,10 +1274,10 @@ drawEnemy:
 	ldr	r3, [r0, #56]
 	cmp	r2, #0
 	add	r3, r3, #20
-	beq	.L304
+	beq	.L305
 	ldr	ip, [r0, #36]
 	str	lr, [sp, #-4]!
-	ldr	lr, .L314
+	ldr	lr, .L315
 	ldr	r2, [r0, #12]
 	ldrb	r0, [r0, #8]	@ zero_extendqisi2
 	add	r1, lr, r3, lsl #3
@@ -1286,29 +1290,29 @@ drawEnemy:
 	orr	r2, r2, #16384
 	strh	r2, [r1, #2]	@ movhi
 	strheq	r3, [r1, #4]	@ movhi
-	beq	.L303
+	beq	.L304
 	cmp	ip, #7
 	moveq	r3, #74
 	strheq	r3, [r1, #4]	@ movhi
-	bne	.L313
-.L303:
+	bne	.L314
+.L304:
 	ldr	lr, [sp], #4
 	bx	lr
-.L304:
+.L305:
 	mov	r1, #512
-	ldr	r2, .L314
+	ldr	r2, .L315
 	lsl	r3, r3, #3
 	strh	r1, [r2, r3]	@ movhi
 	bx	lr
-.L313:
+.L314:
 	cmp	ip, #8
 	moveq	r3, #138
 	ldr	lr, [sp], #4
 	strheq	r3, [r1, #4]	@ movhi
 	bx	lr
-.L315:
+.L316:
 	.align	2
-.L314:
+.L315:
 	.word	shadowOAM
 	.size	drawEnemy, .-drawEnemy
 	.align	2
@@ -1321,69 +1325,69 @@ drawGame:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L326
+	ldr	r3, .L327
 	ldr	r3, [r3, #32]
 	cmp	r3, #0
 	push	{r4, r5, r6, r7, r8, lr}
-	beq	.L317
-	ldr	r2, .L326+4
+	beq	.L318
+	ldr	r2, .L327+4
 	ldrh	r3, [r2]
 	orr	r3, r3, #512
 	strh	r3, [r2]	@ movhi
-.L318:
-	ldr	r3, .L326+8
+.L319:
+	ldr	r3, .L327+8
 	mov	lr, pc
 	bx	r3
-	ldr	r4, .L326+12
+	ldr	r4, .L327+12
 	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
-	ldr	r1, .L326+4
+	ldr	r1, .L327+4
 	mov	lr, pc
 	bx	r4
 	mov	r3, #67108864
-	ldr	r2, .L326+16
+	ldr	r2, .L327+16
 	ldrh	r1, [r2]
-	ldr	r2, .L326+20
+	ldr	r2, .L327+20
 	ldrh	r2, [r2]
 	strh	r1, [r3, #16]	@ movhi
-	ldr	r0, .L326+24
+	ldr	r0, .L327+24
 	strh	r2, [r3, #18]	@ movhi
 	bl	drawEnemy
-	ldr	r4, .L326+28
-	ldr	r0, .L326+32
+	ldr	r4, .L327+28
+	ldr	r0, .L327+32
 	bl	drawEnemy
-	ldr	r0, .L326+36
+	ldr	r0, .L327+36
 	bl	drawEnemy
 	mov	r7, #512
-	ldr	r6, .L326+4
+	ldr	r6, .L327+4
 	add	r5, r4, #1020
-	b	.L321
-.L325:
+	b	.L322
+.L326:
 	mov	r0, r4
 	add	r4, r4, #60
 	bl	drawBubble.part.0
 	cmp	r5, r4
-	beq	.L324
-.L321:
+	beq	.L325
+.L322:
 	ldr	r3, [r4, #24]
 	cmp	r3, #0
-	bne	.L325
+	bne	.L326
 	ldr	r3, [r4, #56]
 	add	r4, r4, #60
 	add	r3, r6, r3, lsl #3
 	cmp	r5, r4
 	strh	r7, [r3, #8]	@ movhi
-	bne	.L321
-.L324:
+	bne	.L322
+.L325:
 	pop	{r4, r5, r6, r7, r8, lr}
 	bx	lr
-.L317:
+.L318:
 	bl	drawPlayer.part.0
-	b	.L318
-.L327:
+	b	.L319
+.L328:
 	.align	2
-.L326:
+.L327:
 	.word	penguin
 	.word	shadowOAM
 	.word	waitForVBlank
@@ -1410,9 +1414,9 @@ updateEnemy:
 	cmp	r3, #0
 	mov	r6, r0
 	sub	sp, sp, #20
-	beq	.L329
-	ldr	r2, .L343
-	ldr	r3, .L343+4
+	beq	.L330
+	ldr	r2, .L344
+	ldr	r3, .L344+4
 	ldr	r0, [r2]
 	ldr	r1, [r3]
 	ldr	r2, [r6]
@@ -1421,24 +1425,24 @@ updateEnemy:
 	sub	r3, r3, r1
 	str	r2, [r6, #8]
 	str	r3, [r6, #12]
-.L329:
-	ldr	r4, .L343+8
-	ldr	r7, .L343+12
-	ldr	r8, .L343+16
-	ldr	r9, .L343+20
+.L330:
+	ldr	r4, .L344+8
+	ldr	r7, .L344+12
+	ldr	r8, .L344+16
+	ldr	r9, .L344+20
 	add	r5, r4, #1020
-	b	.L333
-.L331:
+	b	.L334
+.L332:
 	add	r4, r4, #60
 	cmp	r4, r5
-	beq	.L342
-.L333:
+	beq	.L343
+.L334:
 	ldr	r3, [r4, #24]
 	cmp	r3, #0
-	beq	.L331
+	beq	.L332
 	ldr	r3, [r4, #52]
 	cmp	r3, r7
-	bne	.L331
+	bne	.L332
 	ldm	r6, {r2, r3}
 	ldr	r0, [r6, #24]
 	ldr	r1, [r6, #20]
@@ -1453,7 +1457,7 @@ updateEnemy:
 	mov	lr, pc
 	bx	r8
 	cmp	r0, #0
-	beq	.L331
+	beq	.L332
 	mov	r2, #0
 	ldr	r3, [r9]
 	str	r2, [r6, #28]
@@ -1462,15 +1466,15 @@ updateEnemy:
 	add	r3, r3, #1
 	cmp	r4, r5
 	str	r3, [r9]
-	bne	.L333
-.L342:
+	bne	.L334
+.L343:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, lr}
 	bx	lr
-.L344:
+.L345:
 	.align	2
-.L343:
+.L344:
 	.word	vOff
 	.word	hOff
 	.word	bubbles
@@ -1489,19 +1493,19 @@ updateGame:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
-	ldr	r0, .L353
+	ldr	r0, .L354
 	bl	updateEnemy
-	ldr	r0, .L353+4
+	ldr	r0, .L354+4
 	bl	updateEnemy
-	ldr	r0, .L353+8
+	ldr	r0, .L354+8
 	bl	updateEnemy
-	ldr	r1, .L353+12
-	ldr	r2, .L353+16
-	ldr	r3, .L353+20
+	ldr	r1, .L354+12
+	ldr	r2, .L354+16
+	ldr	r3, .L354+20
 	ldr	lr, [r1]
 	ldr	ip, [r2]
 	add	r0, r3, #1020
-.L347:
+.L348:
 	ldr	r2, [r3, #24]
 	cmp	r2, #0
 	ldmne	r3, {r1, r2}
@@ -1511,12 +1515,12 @@ updateGame:
 	strne	r2, [r3, #12]
 	add	r3, r3, #60
 	cmp	r0, r3
-	bne	.L347
+	bne	.L348
 	pop	{r4, lr}
 	b	updatePlayer
-.L354:
+.L355:
 	.align	2
-.L353:
+.L354:
 	.word	enemies
 	.word	enemies+60
 	.word	enemies+120

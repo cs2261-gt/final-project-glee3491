@@ -206,7 +206,7 @@ goToGame:
 	ldr	r1, .L16+8
 	mov	lr, pc
 	bx	r4
-	mov	r3, #32
+	mov	r3, #432
 	mov	r2, #100663296
 	mov	r0, #3
 	ldr	r1, .L16+12
@@ -258,10 +258,10 @@ goToGame:
 .L16:
 	.word	waitForVBlank
 	.word	DMANow
-	.word	bg1Pal
-	.word	bg1Tiles
+	.word	gamebg3Pal
+	.word	gamebg3Tiles
 	.word	100720640
-	.word	bg1Map
+	.word	gamebg3Map
 	.word	vOff
 	.word	hOff
 	.word	100728832

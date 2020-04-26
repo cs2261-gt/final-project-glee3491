@@ -5,7 +5,7 @@
 #include "sound.h"
 #include "spritesheet.h"
 #include "house.h"
-#include "bg1.h"
+#include "gamebg3.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
@@ -166,9 +166,9 @@ void goToGame() {
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, bg1Pal, PALETTE, bg1PalLen / 2);
-    DMANow(3, bg1Tiles, &CHARBLOCK[0], bg1TilesLen / 2);
-    DMANow(3, bg1Map, &SCREENBLOCK[28], bg1MapLen / 2);
+    DMANow(3, gamebg3Pal, PALETTE, gamebg3PalLen / 2);
+    DMANow(3, gamebg3Tiles, &CHARBLOCK[0], gamebg3TilesLen / 2);
+    DMANow(3, gamebg3Map, &SCREENBLOCK[28], gamebg3MapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;

@@ -4,7 +4,7 @@
 #include "myLib.h"
 #include "game.h"
 #include "sound.h"
-#include "collisionmap.h"
+#include "collisionmap3.h"
 #include "bubble.h"
 
 
@@ -48,12 +48,6 @@ void initGame() {
 
 void updateGame() {
 
-    // if (hOff > 512) {
-    //     screenBlock++;
-    //     hOff -= 512;
-    //     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(screenBlock) | BG_SIZE_LARGE | BG_4BPP; 
-    // }
-
     // // Update all the enemies
     for (int i = 0; i < ENEMYCOUNT; i++) {
         updateEnemy(&enemies[i]);
@@ -94,7 +88,7 @@ void initPlayer() {
     penguin.width = 16;
     penguin.height = 16;
     penguin.rDel = 1;
-    penguin.cDel = 1;
+    penguin.cDel = 12;
 
     penguin.worldRow = SCREENHEIGHT / 2 - penguin.width / 2 + vOff + 8;
     penguin.worldCol = SCREENWIDTH / 2 - penguin.height / 2 + hOff;
@@ -111,8 +105,8 @@ void updatePlayer() {
     int enemyCollide = 0;
     if (BUTTON_HELD(BUTTON_UP)) {
         if (penguin.worldRow > 0
-            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
-            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
+            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
+            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
                 for (int i = 0; i < BUBBLECOUNT; i++) {
                     if (bubbles[i].active) {
                          if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow - penguin.rDel, 16, 16)) {
@@ -141,8 +135,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_DOWN)) {
         if (penguin.worldRow + penguin.height < 256
-            && collisionmapBitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
-            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
             for (int i = 0; i < BUBBLECOUNT; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow + penguin.rDel, 16, 16)) {
@@ -169,8 +163,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_LEFT)) {
         if (penguin.worldCol > 0
-            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
-            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
             for (int i = 0; i < BUBBLECOUNT; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol - penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -197,8 +191,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_RIGHT)) {
         if (penguin.worldCol + penguin.width < 256
-            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
-            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
+            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
              for (int i = 0; i < BUBBLECOUNT; i++) {
                     if (bubbles[i].active) {
                         if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol + penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -333,10 +327,10 @@ void putBubble() {
                 bubbles[i].worldRow = penguin.worldRow;
                 bubbles[i].worldCol = penguin.worldCol + penguin.width;
             }
-            if (collisionmapBitmap[OFFSET(bubbles[i].worldCol,bubbles[i].worldRow, MAPWIDTH)] // Top left corner
-                && collisionmapBitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow, MAPWIDTH)] // Top right corner
-                && collisionmapBitmap[OFFSET(bubbles[i].worldCol, bubbles[i].worldRow + 10, MAPWIDTH)] // Botton left corner
-                && collisionmapBitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow + 10, MAPWIDTH)]) { // Bottom right corner
+            if (collisionmap3Bitmap[OFFSET(bubbles[i].worldCol,bubbles[i].worldRow, MAPWIDTH)] // Top left corner
+                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow, MAPWIDTH)] // Top right corner
+                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol, bubbles[i].worldRow + 10, MAPWIDTH)] // Botton left corner
+                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow + 10, MAPWIDTH)]) { // Bottom right corner
                 bubbles[i].active = 1;
                 break;
             }
@@ -379,10 +373,11 @@ void initEnemy(int enemyNum) {
         while (!enemies[i].set) {
             enemies[i].worldRow = (rand() % 220) + 16;
             enemies[i].worldCol = (rand() % 220) + 16;
-            if (collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
-                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
-                && collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
-                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]) { // Bottom right corner
+            if (collisionmap3Bitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
+                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
+                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
+                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]
+                && enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0) { // Bottom right corner
                 enemies[i].set = 1;
             }
         }
