@@ -57,7 +57,8 @@ typedef struct {
 
 // Constant
 #define ENEMYCOUNT 3
-#define BUBBLECOUNT 17
+#define BUBBLECOUNT 5
+#define BUBBLECOUNT3 10
 #define MAPHEIGHT 256
 #define MAPWIDTH 256
 
@@ -72,14 +73,18 @@ extern int score;
 extern int lifeRemaining;
 
 // Protypes
-void initGame();
-void updateGame();
+void initGame1();
+void initGame2();
+void initGame3();
+void updateGame1();
+void updateGame2();
+void updateGame3();
 void drawGame();
 void initPlayer();
-void updatePlayer();
+void updatePlayer(unsigned short *);
 void animatePlayer();
 void drawPlayer();
-void initEnemy(int);
+void initEnemy(unsigned short *);
 void activateEnemy();
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
