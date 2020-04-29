@@ -5,6 +5,7 @@
         "splashscreen.h": "c",
         "losescreen.h": "c",
         "collisionmap.h": "c",
-        "gamebg1.h": "c"
+        "gamebg1.h": "c",
+        "pausescreen.h": "c"
     }
 }

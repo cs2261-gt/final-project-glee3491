@@ -1389,10 +1389,10 @@ typedef struct {
     int timer;
     int index;
 } BUBBLE;
-# 65 "game.h"
+# 66 "game.h"
 extern PLAYER penguin;
 extern ENEMY enemies[3];
-extern BUBBLE bubbles[17];
+extern BUBBLE bubbles[5];
 extern int hOff;
 extern int vOff;
 extern OBJ_ATTR shadowOAM[128];
@@ -1400,14 +1400,18 @@ extern int score;
 extern int lifeRemaining;
 
 
-void initGame();
-void updateGame();
+void initGame1();
+void initGame2();
+void initGame3();
+void updateGame1();
+void updateGame2();
+void updateGame3();
 void drawGame();
 void initPlayer();
-void updatePlayer();
+void updatePlayer(unsigned short *);
 void animatePlayer();
 void drawPlayer();
-void initEnemy(int);
+void initEnemy(unsigned short *);
 void activateEnemy();
 void updateEnemy(ENEMY *);
 void drawEnemy(ENEMY *);
@@ -1450,6 +1454,26 @@ extern const unsigned short houseMap[1024];
 
 extern const unsigned short housePal[256];
 # 8 "main.c" 2
+# 1 "gamebg1.h" 1
+# 22 "gamebg1.h"
+extern const unsigned short gamebg1Tiles[432];
+
+
+extern const unsigned short gamebg1Map[1024];
+
+
+extern const unsigned short gamebg1Pal[256];
+# 9 "main.c" 2
+# 1 "gamebg2.h" 1
+# 22 "gamebg2.h"
+extern const unsigned short gamebg2Tiles[144];
+
+
+extern const unsigned short gamebg2Map[1024];
+
+
+extern const unsigned short gamebg2Pal[256];
+# 10 "main.c" 2
 # 1 "gamebg3.h" 1
 # 22 "gamebg3.h"
 extern const unsigned short gamebg3Tiles[432];
@@ -1459,7 +1483,7 @@ extern const unsigned short gamebg3Map[1024];
 
 
 extern const unsigned short gamebg3Pal[256];
-# 9 "main.c" 2
+# 11 "main.c" 2
 # 1 "splashscreen.h" 1
 # 22 "splashscreen.h"
 extern const unsigned short splashscreenTiles[880];
@@ -1469,7 +1493,7 @@ extern const unsigned short splashscreenMap[1024];
 
 
 extern const unsigned short splashscreenPal[256];
-# 10 "main.c" 2
+# 12 "main.c" 2
 # 1 "instructionscreen.h" 1
 # 22 "instructionscreen.h"
 extern const unsigned short instructionscreenTiles[3888];
@@ -1479,7 +1503,7 @@ extern const unsigned short instructionscreenMap[1024];
 
 
 extern const unsigned short instructionscreenPal[256];
-# 11 "main.c" 2
+# 13 "main.c" 2
 # 1 "pausescreen.h" 1
 # 22 "pausescreen.h"
 extern const unsigned short pausescreenTiles[768];
@@ -1489,7 +1513,27 @@ extern const unsigned short pausescreenMap[1024];
 
 
 extern const unsigned short pausescreenPal[256];
-# 12 "main.c" 2
+# 14 "main.c" 2
+# 1 "left.h" 1
+# 22 "left.h"
+extern const unsigned short leftTiles[112];
+
+
+extern const unsigned short leftMap[2048];
+
+
+extern const unsigned short leftPal[256];
+# 15 "main.c" 2
+# 1 "right.h" 1
+# 22 "right.h"
+extern const unsigned short rightTiles[112];
+
+
+extern const unsigned short rightMap[2048];
+
+
+extern const unsigned short rightPal[256];
+# 16 "main.c" 2
 # 1 "winscreen.h" 1
 # 22 "winscreen.h"
 extern const unsigned short winscreenTiles[576];
@@ -1499,7 +1543,7 @@ extern const unsigned short winscreenMap[1024];
 
 
 extern const unsigned short winscreenPal[256];
-# 13 "main.c" 2
+# 17 "main.c" 2
 # 1 "losescreen.h" 1
 # 22 "losescreen.h"
 extern const unsigned short losescreenTiles[592];
@@ -1509,15 +1553,15 @@ extern const unsigned short losescreenMap[1024];
 
 
 extern const unsigned short losescreenPal[256];
-# 14 "main.c" 2
+# 18 "main.c" 2
 # 1 "huffnpuff.h" 1
 # 20 "huffnpuff.h"
 extern const unsigned char huffnpuff[1965888];
-# 15 "main.c" 2
+# 19 "main.c" 2
 # 1 "bubble.h" 1
 # 20 "bubble.h"
 extern const unsigned char bubble[1734];
-# 16 "main.c" 2
+# 20 "main.c" 2
 
 
 
@@ -1530,6 +1574,8 @@ void game();
 void goToGame();
 void game2();
 void goToGame2();
+void game3();
+void goToGame3();
 void pause();
 void goToPause();
 void win();
@@ -1548,9 +1594,10 @@ unsigned short oldButtons;
 
 int seed;
 
-enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
+enum {SPLASH, INSTRUCTION, GAME, GAME2, GAME3, PAUSE, WIN, LOSE};
 int state;
 int gameState;
+int hoff;
 
 int main() {
 
@@ -1577,6 +1624,9 @@ int main() {
             case GAME2:
                 game2();
                 break;
+            case GAME3:
+                game3();
+                break;
             case PAUSE:
                 pause();
                 break;
@@ -1594,7 +1644,7 @@ int main() {
 
 void initialize() {
 
-    initGame();
+    initGame1();
 
 
     (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
@@ -1654,7 +1704,6 @@ void goToInstruction() {
 }
 
 void instruction() {
-    seed++;
     waitForVBlank();
 
     if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
@@ -1671,9 +1720,9 @@ void goToGame() {
     waitForVBlank();
 
 
-    DMANow(3, gamebg3Pal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, gamebg3Tiles, &((charblock *)0x6000000)[0], 864 / 2);
-    DMANow(3, gamebg3Map, &((screenblock *)0x6000000)[28], 2048 / 2);
+    DMANow(3, gamebg1Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, gamebg1Tiles, &((charblock *)0x6000000)[0], 864 / 2);
+    DMANow(3, gamebg1Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;
@@ -1689,7 +1738,7 @@ void goToGame() {
 
 void game() {
 
-    updateGame();
+    updateGame1();
     drawGame();
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
@@ -1706,19 +1755,20 @@ void game() {
     }
 
 
-    if (score > 7) {
-        pauseSound();
-        goToWin();
+    if (score > 3) {
+        goToGame2();
     }
 }
 
 void goToGame2() {
+
+    initGame2();
     waitForVBlank();
 
 
-    DMANow(3, housePal, ((unsigned short *)0x5000000), 512 / 2);
-    DMANow(3, houseTiles, &((charblock *)0x6000000)[0], 1792 / 2);
-    DMANow(3, houseMap, &((screenblock *)0x6000000)[28], 2048 / 2);
+    DMANow(3, gamebg2Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, gamebg2Tiles, &((charblock *)0x6000000)[0], 288 / 2);
+    DMANow(3, gamebg2Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
     (*(volatile unsigned short *)0x04000012) = vOff;
     (*(volatile unsigned short *)0x04000010) = hOff;
@@ -1733,18 +1783,57 @@ void goToGame2() {
 }
 
 void game2() {
-    updateGame();
+
+    updateGame2();
     drawGame();
 
     if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToPause();
     }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 6) {
+        goToGame3();
+    }
+}
+
+void goToGame3() {
+
+    initGame3();
+    waitForVBlank();
 
 
+    DMANow(3, gamebg3Pal, ((unsigned short *)0x5000000), 512 / 2);
+    DMANow(3, gamebg3Tiles, &((charblock *)0x6000000)[0], 864 / 2);
+    DMANow(3, gamebg3Map, &((screenblock *)0x6000000)[28], 2048 / 2);
 
+    (*(volatile unsigned short *)0x04000012) = vOff;
+    (*(volatile unsigned short *)0x04000010) = hOff;
 
+    DMANow(3, spritesheetTiles, &((charblock *)0x6000000)[4], 32768 / 2);
+    DMANow(3, spritesheetPal, ((unsigned short *)0x5000200), 512 / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 128 * 4);
 
+    state = GAME3;
+    gameState = GAME3;
+}
 
+void game3() {
+    updateGame3();
+    drawGame();
+
+    if ((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
+        goToPause();
+    }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 9) {
+        pauseSound();
+        goToWin();
+    }
 }
 
 void goToPause() {
@@ -1779,6 +1868,7 @@ void pause() {
     if ((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
         main();
     }
+# 335 "main.c"
 }
 
 void goToWin() {

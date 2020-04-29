@@ -4,6 +4,8 @@
 #include "myLib.h"
 #include "game.h"
 #include "sound.h"
+#include "collisionmap1.h"
+#include "collisionmap2.h"
 #include "collisionmap3.h"
 #include "bubble.h"
 
@@ -30,7 +32,7 @@ SOUND soundb;
 // Penguin animation states for aniState
 enum {PENFRONT, PENBACK, PENRIGHT, PENLEFT, BUB, HEART, EN_1, EN_2, EN_3, PENIDLE};
 
-void initGame() {
+void initGame1() {
 
     vOff = 96;
     hOff = 6;
@@ -42,13 +44,43 @@ void initGame() {
 
     initBubble();
 
-    initEnemy(ENEMYCOUNT);
+    initEnemy(collisionmap1Bitmap);
+}
+
+void initGame2() {
+
+    vOff = 96;
+    hOff = 6;
+
+    if (lifeRemaining < 3) {
+        lifeRemaining++;
+    }
+
+    initPlayer();
+
+    initBubble();
+
+    initEnemy(collisionmap2Bitmap);
+}
+
+void initGame3() {
+
+    vOff = 96;
+    hOff = 6;
+
+    lifeRemaining *= 2;
+
+    initPlayer();
+
+    initBubble();
+
+    initEnemy(collisionmap3Bitmap);
 }
 
 
-void updateGame() {
+void updateGame1() {
 
-    // // Update all the enemies
+    // Update all the enemies
     for (int i = 0; i < ENEMYCOUNT; i++) {
         updateEnemy(&enemies[i]);
     }
@@ -58,7 +90,37 @@ void updateGame() {
         updateBubble(&bubbles[i]);
     }
     // Update Player
-    updatePlayer();
+    updatePlayer(collisionmap1Bitmap);
+}
+
+void updateGame2() {
+
+    //  Update all the enemies
+    for (int i = 0; i < ENEMYCOUNT; i++) {
+        updateEnemy(&enemies[i]);
+    }
+
+    // Update all the bubbles
+    for (int i = 0; i < BUBBLECOUNT; i++) {
+        updateBubble(&bubbles[i]);
+    }
+    // Update Player
+    updatePlayer(collisionmap2Bitmap);
+}
+
+void updateGame3() {
+
+    // Update all the enemies
+    for (int i = 0; i < ENEMYCOUNT; i++) {
+        updateEnemy(&enemies[i]);
+    }
+
+    // Update all the bubbles
+    for (int i = 0; i < BUBBLECOUNT3; i++) {
+        updateBubble(&bubbles[i]);
+    }
+    // Update Player
+    updatePlayer(collisionmap3Bitmap);
 }
 
 void drawGame() {
@@ -88,7 +150,7 @@ void initPlayer() {
     penguin.width = 16;
     penguin.height = 16;
     penguin.rDel = 1;
-    penguin.cDel = 12;
+    penguin.cDel = 1;
 
     penguin.worldRow = SCREENHEIGHT / 2 - penguin.width / 2 + vOff + 8;
     penguin.worldCol = SCREENWIDTH / 2 - penguin.height / 2 + hOff;
@@ -99,14 +161,14 @@ void initPlayer() {
     penguin.bubbleTimer = 20;
 }
 
-void updatePlayer() {
+void updatePlayer(unsigned short* collisionmapBitmap) {
 
     int bubbleCollide = 0;
     int enemyCollide = 0;
     if (BUTTON_HELD(BUTTON_UP)) {
         if (penguin.worldRow > 0
-            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
-            && collisionmap3Bitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + penguin.worldCol]
+            && collisionmapBitmap[(penguin.worldRow - penguin.rDel) * MAPWIDTH + (penguin.worldCol + penguin.width - penguin.cDel)]) {
                 for (int i = 0; i < BUBBLECOUNT; i++) {
                     if (bubbles[i].active) {
                          if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow - penguin.rDel, 16, 16)) {
@@ -135,8 +197,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_DOWN)) {
         if (penguin.worldRow + penguin.height < 256
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
+            && collisionmapBitmap[OFFSET(penguin.worldCol, penguin.worldRow + penguin.height, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width - penguin.cDel, penguin.worldRow + penguin.height, MAPWIDTH)]) {
             for (int i = 0; i < BUBBLECOUNT; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow + penguin.rDel, 16, 16)) {
@@ -163,8 +225,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_LEFT)) {
         if (penguin.worldCol > 0
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
+            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol - penguin.cDel, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
             for (int i = 0; i < BUBBLECOUNT; i++) {
                 if (bubbles[i].active) {
                     if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol - penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -191,8 +253,8 @@ void updatePlayer() {
 
     else if (BUTTON_HELD(BUTTON_RIGHT)) {
         if (penguin.worldCol + penguin.width < 256
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
-            && collisionmap3Bitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow, MAPWIDTH)]
+            && collisionmapBitmap[OFFSET(penguin.worldCol + penguin.width, penguin.worldRow + penguin.height - penguin.rDel, MAPWIDTH)]) {
              for (int i = 0; i < BUBBLECOUNT; i++) {
                     if (bubbles[i].active) {
                         if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol + penguin.cDel, penguin.worldRow, 16, 16)) {
@@ -219,19 +281,20 @@ void updatePlayer() {
 
     if (BUTTON_PRESSED(BUTTON_A)) {
         playSoundB(bubble, BUBBLELEN, 0);
-        putBubble();
+        putBubble(collisionmapBitmap);
     }
 
     for (int i = 0; i < BUBBLECOUNT; i++) {
-        if (bubbles[i].active) {
-            bubbles[i].timer++;
-        }
-        if (bubbles[i].timer == 320) {
-            bubbles[i].active = 0;
-            bubbles[i].timer = 0;
-        }
-        if (bubbles[i].active && bubbles[i].timer == 318) {
-            if (collision(bubbles[i].worldCol, bubbles[i].worldRow, 16, 16, penguin.worldCol, penguin.worldRow, 16, 16)) {
+        updateBubble(&bubbles[i]);
+        // if (bubbles[i].active) {
+        //     bubbles[i].timer++;
+        // }
+        // if (bubbles[i].timer == 320) {
+        //     bubbles[i].active = 0;
+        //     bubbles[i].timer = 0;
+        // }
+        if (bubbles[i].active && bubbles[i].timer == 315) {
+            if (collision(bubbles[i].worldCol + 4, bubbles[i].worldRow + 4, 20, 20, penguin.worldCol, penguin.worldRow, 16, 16)) {
                 lifeRemaining--;
             }
         }
@@ -241,6 +304,7 @@ void updatePlayer() {
         if (enemies[i].set) {
             enemies[i].timer++;
         }
+
         if (enemies[i].timer == 1000) {
             enemies[i].active = 0;
             enemies[i].timer = 0;
@@ -251,9 +315,10 @@ void updatePlayer() {
     penguin.screenCol = penguin.worldCol - hOff;
 
     animatePlayer(); 
-    if (timer % 200 == 0) {
-        activateEnemy();
-    }
+    activateEnemy();
+    // if (timer % 200 == 0) {
+    //     activateEnemy();
+    // }
 }
 
 void animatePlayer() {
@@ -311,7 +376,7 @@ void initBubble() {
     }
 }
 
-void putBubble() {
+void putBubble(unsigned short* collisionmapBitmap) {
     for (int i = 0; i < BUBBLECOUNT; i++) {
         if (!bubbles[i].active) {
             if (penguin.aniState == PENFRONT) {
@@ -327,13 +392,8 @@ void putBubble() {
                 bubbles[i].worldRow = penguin.worldRow;
                 bubbles[i].worldCol = penguin.worldCol + penguin.width;
             }
-            if (collisionmap3Bitmap[OFFSET(bubbles[i].worldCol,bubbles[i].worldRow, MAPWIDTH)] // Top left corner
-                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow, MAPWIDTH)] // Top right corner
-                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol, bubbles[i].worldRow + 10, MAPWIDTH)] // Botton left corner
-                && collisionmap3Bitmap[OFFSET(bubbles[i].worldCol + 10, bubbles[i].worldRow + 10, MAPWIDTH)]) { // Bottom right corner
-                bubbles[i].active = 1;
-                break;
-            }
+            bubbles[i].active = 1;
+            break;
         }
     }
 }
@@ -342,6 +402,11 @@ void updateBubble(BUBBLE* bubble) {
     if (bubble->active) {
         bubble->screenRow = bubble->worldRow - vOff;
         bubble->screenCol = bubble->worldCol - hOff;
+        bubble->timer++;
+    }
+    if (bubble->timer == 320) {
+        bubble->active = 0;
+        bubble->timer = 0;
     }
 }
 
@@ -349,7 +414,7 @@ void drawBubble(BUBBLE* bubble) {
         if (bubble->active) {
             shadowOAM[1 + bubble->index].attr0 = (ROWMASK & bubble->screenRow) | ATTR0_4BPP | ATTR0_SQUARE;
             shadowOAM[1 + bubble->index].attr1 = (COLMASK & bubble->screenCol) | ATTR1_SMALL;
-            if (bubble->timer < 310) {
+            if (bubble->timer < 314) {
                 shadowOAM[1 + bubble->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(8, 0);
             } else {
                 shadowOAM[1 + bubble->index].attr2 = ATTR2_PALROW(0) | ATTR2_TILEID(8, 2);
@@ -362,8 +427,8 @@ void drawBubble(BUBBLE* bubble) {
 
 }
 
-void initEnemy(int enemyNum) {
-    for (int i = 0; i < enemyNum; i++) {
+void initEnemy(unsigned short* collisionmapBitmap) {
+    for (int i = 0; i < ENEMYCOUNT; i++) {
         enemies[i].width = 14;
         enemies[i].height = 14;
         enemies[i].aniCounter = 0;
@@ -373,10 +438,10 @@ void initEnemy(int enemyNum) {
         while (!enemies[i].set) {
             enemies[i].worldRow = (rand() % 220) + 16;
             enemies[i].worldCol = (rand() % 220) + 16;
-            if (collisionmap3Bitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
-                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
-                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
-                && collisionmap3Bitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]
+            if (collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]
                 && enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0) { // Bottom right corner
                 enemies[i].set = 1;
             }
@@ -427,8 +492,8 @@ void updateEnemy(ENEMY* enemy) {
     }
 
     for (int i = 0; i < BUBBLECOUNT; i++) {
-        if (bubbles[i].active && bubbles[i].timer == 318) {
-            if (collision(bubbles[i].worldCol, bubbles[i].worldRow, bubbles[i].width, bubbles[i].height, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
+        if (bubbles[i].active && bubbles[i].timer > 315 && enemy->active) {
+            if (collision(bubbles[i].worldCol + 4, bubbles[i].worldRow + 4, bubbles[i].width + 4, bubbles[i].height + 4, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
                 enemy->active = 0;
                 bubbles[i].active = 0;
                 score++;

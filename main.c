@@ -5,10 +5,14 @@
 #include "sound.h"
 #include "spritesheet.h"
 #include "house.h"
+#include "gamebg1.h"
+#include "gamebg2.h"
 #include "gamebg3.h"
 #include "splashscreen.h"
 #include "instructionscreen.h"
 #include "pausescreen.h"
+#include "left.h"
+#include "right.h"
 #include "winscreen.h"
 #include "losescreen.h"
 #include "huffnpuff.h"
@@ -25,6 +29,8 @@ void game();
 void goToGame();
 void game2();
 void goToGame2();
+void game3();
+void goToGame3();
 void pause();
 void goToPause();
 void win();
@@ -43,9 +49,10 @@ unsigned short oldButtons;
 // Random Seed
 int seed;
 
-enum {SPLASH, INSTRUCTION, GAME, GAME2, PAUSE, WIN, LOSE};
+enum {SPLASH, INSTRUCTION, GAME, GAME2, GAME3, PAUSE, WIN, LOSE};
 int state;
 int gameState;
+int hoff;
 
 int main() {
 
@@ -72,6 +79,9 @@ int main() {
             case GAME2:
                 game2();
                 break;
+            case GAME3:
+                game3();
+                break;
             case PAUSE:
                 pause();
                 break;
@@ -88,8 +98,8 @@ int main() {
 }
 
 void initialize() {
-    
-    initGame();
+
+    initGame1();
     // Tell the BG0 control register where to look for its tiles and tile map
     // And how to read them from this location
     REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
@@ -149,7 +159,6 @@ void goToInstruction() {
 }
 
 void instruction() {
-    seed++;
     waitForVBlank();
 
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
@@ -166,9 +175,9 @@ void goToGame() {
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, gamebg3Pal, PALETTE, gamebg3PalLen / 2);
-    DMANow(3, gamebg3Tiles, &CHARBLOCK[0], gamebg3TilesLen / 2);
-    DMANow(3, gamebg3Map, &SCREENBLOCK[28], gamebg3MapLen / 2);
+    DMANow(3, gamebg1Pal, PALETTE, gamebg1PalLen / 2);
+    DMANow(3, gamebg1Tiles, &CHARBLOCK[0], gamebg1TilesLen / 2);
+    DMANow(3, gamebg1Map, &SCREENBLOCK[28], gamebg1MapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;
@@ -184,7 +193,7 @@ void goToGame() {
 
 void game() {
 
-    updateGame();
+    updateGame1();
     drawGame();
     
     if (BUTTON_PRESSED(BUTTON_START)) {
@@ -201,19 +210,20 @@ void game() {
     }
     /* scroe should increase on the enemy gets hit but a bubble but collision doesn't work
     */
-    if (score > 7) {
-        pauseSound();
-        goToWin();
+    if (score > 3) {
+        goToGame2();
     }
 }
 
 void goToGame2() {
+    
+    initGame2();
     waitForVBlank();
 
     // Load game screen
-    DMANow(3, housePal, PALETTE, housePalLen / 2);
-    DMANow(3, houseTiles, &CHARBLOCK[0], houseTilesLen / 2);
-    DMANow(3, houseMap, &SCREENBLOCK[28], houseMapLen / 2);
+    DMANow(3, gamebg2Pal, PALETTE, gamebg2PalLen / 2);
+    DMANow(3, gamebg2Tiles, &CHARBLOCK[0], gamebg2TilesLen / 2);
+    DMANow(3, gamebg2Map, &SCREENBLOCK[28], gamebg2MapLen / 2);
 
     REG_BG0VOFF = vOff;
     REG_BG0HOFF = hOff;
@@ -228,18 +238,57 @@ void goToGame2() {
 }
 
 void game2() {
-    updateGame();
+
+    updateGame2();
     drawGame();
     
     if (BUTTON_PRESSED(BUTTON_START)) {
         goToPause();
     }
-    // if (lifeRemaining == 0) {
-    //     goToLose();
-    // }
-    // if (score > 7) {
-    //     goToWin();
-    // }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 6) {
+        goToGame3();
+    }
+}
+
+void goToGame3() {
+
+    initGame3();
+    waitForVBlank();
+
+    // Load game screen
+    DMANow(3, gamebg3Pal, PALETTE, gamebg3PalLen / 2);
+    DMANow(3, gamebg3Tiles, &CHARBLOCK[0], gamebg3TilesLen / 2);
+    DMANow(3, gamebg3Map, &SCREENBLOCK[28], gamebg3MapLen / 2);
+
+    REG_BG0VOFF = vOff;
+    REG_BG0HOFF = hOff;
+
+    DMANow(3, spritesheetTiles, &CHARBLOCK[4], spritesheetTilesLen / 2);
+    DMANow(3, spritesheetPal, SPRITEPALETTE, spritesheetPalLen / 2);
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, 128 * 4);
+
+    state = GAME3;
+    gameState = GAME3;
+}
+
+void game3() {
+    updateGame3();
+    drawGame();
+    
+    if (BUTTON_PRESSED(BUTTON_START)) {
+        goToPause();
+    }
+    if (lifeRemaining == 0) {
+        goToLose();
+    }
+    if (score > 9) {
+        pauseSound();
+        goToWin();
+    }
 }
 
 void goToPause() {
@@ -274,6 +323,15 @@ void pause() {
     if (BUTTON_PRESSED(BUTTON_SELECT)) {
         main();
     }
+
+    // while (state == PAUSE) {
+    //     hoff--;
+    // }
+
+    // REG_BG0HOFF = hoff;
+    // if (hoff % 2 == 0) {
+    //     REG_BG1HOFF = hoff;
+    // }
 }
 
 void goToWin() {
