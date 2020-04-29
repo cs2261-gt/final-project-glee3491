@@ -56,9 +56,8 @@ typedef struct {
 } BUBBLE;
 
 // Constant
-#define ENEMYCOUNT 3
+#define ENEMYCOUNT 12
 #define BUBBLECOUNT 5
-#define BUBBLECOUNT3 10
 #define MAPHEIGHT 256
 #define MAPWIDTH 256
 
