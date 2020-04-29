@@ -21,7 +21,7 @@ int hOff;
 int playerHOff;
 int playerVOff;
 int screenBlock;
-int timer;
+// int timer;
 
 
 // check how many enemies are on screen
@@ -116,7 +116,7 @@ void updateGame3() {
     }
 
     // Update all the bubbles
-    for (int i = 0; i < BUBBLECOUNT3; i++) {
+    for (int i = 0; i < BUBBLECOUNT; i++) {
         updateBubble(&bubbles[i]);
     }
     // Update Player
@@ -293,7 +293,7 @@ void updatePlayer(unsigned short* collisionmapBitmap) {
         //     bubbles[i].active = 0;
         //     bubbles[i].timer = 0;
         // }
-        if (bubbles[i].active && bubbles[i].timer == 315) {
+        if (bubbles[i].active && bubbles[i].timer > 315) {
             if (collision(bubbles[i].worldCol + 4, bubbles[i].worldRow + 4, 20, 20, penguin.worldCol, penguin.worldRow, 16, 16)) {
                 lifeRemaining--;
             }
@@ -305,7 +305,7 @@ void updatePlayer(unsigned short* collisionmapBitmap) {
             enemies[i].timer++;
         }
 
-        if (enemies[i].timer == 1000) {
+        if (enemies[i].timer == 800) {
             enemies[i].active = 0;
             enemies[i].timer = 0;
         }
@@ -316,9 +316,6 @@ void updatePlayer(unsigned short* collisionmapBitmap) {
 
     animatePlayer(); 
     activateEnemy();
-    // if (timer % 200 == 0) {
-    //     activateEnemy();
-    // }
 }
 
 void animatePlayer() {
@@ -441,16 +438,15 @@ void initEnemy(unsigned short* collisionmapBitmap) {
             if (collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow, MAPWIDTH)] // Top left corner
                 && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow, MAPWIDTH)] // Top right corner
                 && collisionmapBitmap[OFFSET(enemies[i].worldCol, enemies[i].worldRow + enemies[i].height, MAPWIDTH)] // Botton left corner
-                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]
-                && enemies[i].worldRow % 16 == 0 && enemies[i].worldCol % 16 == 0) { // Bottom right corner
+                && collisionmapBitmap[OFFSET(enemies[i].worldCol + enemies[i].width, enemies[i].worldRow + enemies[i].height, MAPWIDTH)]) { // Bottom right corner
                 enemies[i].set = 1;
             }
         }
-        if (i == 0) {
+        if (i % 3 == 0) {
             enemies[i].aniState = EN_1;
-        } else if (i == 1) {
+        } else if (i % 3 == 1) {
             enemies[i].aniState = EN_2;
-        } else if (i == 2) {
+        } else if (i % 3 == 2) {
             enemies[i].aniState = EN_3;
         }
     }
@@ -458,10 +454,9 @@ void initEnemy(unsigned short* collisionmapBitmap) {
 }
 
 void activateEnemy() {
-    for (int i = 0; i < ENEMYCOUNT; i++) {
-        if (!enemies[i].active) {
+    for (int i = 1; i < ENEMYCOUNT; i++) {
+        if (!enemies[i].active && enemies[i].timer == 200) {
             enemies[i].active = 1;
-            break;
         }
     }
 }
@@ -492,8 +487,8 @@ void updateEnemy(ENEMY* enemy) {
     }
 
     for (int i = 0; i < BUBBLECOUNT; i++) {
-        if (bubbles[i].active && bubbles[i].timer > 315 && enemy->active) {
-            if (collision(bubbles[i].worldCol + 4, bubbles[i].worldRow + 4, bubbles[i].width + 4, bubbles[i].height + 4, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
+        if (bubbles[i].active && bubbles[i].timer > 318) {
+            if (collision(bubbles[i].worldCol, bubbles[i].worldRow, bubbles[i].width, bubbles[i].height, enemy->worldCol, enemy->worldRow, enemy->width, enemy->height)) {
                 enemy->active = 0;
                 bubbles[i].active = 0;
                 score++;
